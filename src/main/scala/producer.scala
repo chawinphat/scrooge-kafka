@@ -8,14 +8,16 @@ import org.apache.kafka.clients.producer._
 object Producer {
 
   def main(args: Array[String]): Unit = {
-    writeToKafka("quickstart-events", "helloo")
+    while (true) {
+      writeToKafka("quickstart-events", "helloo")
+    }
   }
 
   def writeToKafka(topic: String, message: String): Unit = {
-   val message = new CrossChainMessage()
-  //  val messageData = new CrossChainMessageData(messageContent)
-  //  message.addData(messageData)
-   val seralizedMesage = message.toByteArray
+    val message = new CrossChainMessage()
+    //  val messageData = new CrossChainMessageData(messageContent)
+    //  message.addData(messageData)
+    val seralizedMesage = message.toByteArray
 
     val props = new Properties()
     props.put("bootstrap.servers", "localhost:9092")
