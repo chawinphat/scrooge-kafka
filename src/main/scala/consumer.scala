@@ -27,7 +27,7 @@ object Consumer {
 
   def consumeFromKafka(topic: String, timer: Deadline) = {
     val props = new Properties()
-    props.put("bootstrap.servers", "localhost:9092")
+    props.put("bootstrap.servers", "10.138.8.179:9092, 10.138.8.180:9092, 10.138.8.181:9092")
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")

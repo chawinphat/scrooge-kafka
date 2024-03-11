@@ -20,7 +20,7 @@ object Producer {
     val seralizedMesage = message.toByteArray
 
     val props = new Properties()
-    props.put("bootstrap.servers", "localhost:9092")
+    props.put("bootstrap.servers", "10.138.8.179:9092, 10.138.8.180:9092, 10.138.8.181:9092")
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     val producer = new KafkaProducer[String, Array[Byte]](props)
