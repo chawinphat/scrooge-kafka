@@ -1,4 +1,5 @@
-package scrooge
+package main
+
 import scrooge.scrooge_message._
 import scrooge.scrooge_networking._
 
@@ -12,13 +13,14 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Consumer {
+  val configReader = new ConfigReader
 
   def main(args: Array[String]): Unit = {
     val timer = 10.seconds.fromNow
 
     // Run a new thread to measure throughput -> an optimization since polling may take a bit of time
     val throughputMeasurement = Future {
-      consumeFromKafka("quickstart-events", timer)
+      consumeFromKafka(configReader.getTopic(), timer)
     }
 
     // Wait on new thread to finish

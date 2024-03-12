@@ -1,4 +1,5 @@
-package scrooge
+package main
+
 import scrooge.scrooge_message._
 import scrooge.scrooge_networking._
 
@@ -6,10 +7,11 @@ import java.util.Properties
 import org.apache.kafka.clients.producer._
 
 object Producer {
+  val configReader = new ConfigReader
 
   def main(args: Array[String]): Unit = {
     while (true) {
-      writeToKafka("quickstart-events", "helloo")
+      writeToKafka(configReader.getTopic(), configReader.getMessage())
     }
   }
 

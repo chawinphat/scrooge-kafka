@@ -15,8 +15,8 @@ lazy val root = (project in file("."))
     libraryDependencies += munit % Test,
     libraryDependencies += "org.apache.kafka" % "kafka-clients" % "3.6.0",
     libraryDependencies ++= Seq(
-    "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
-)
+    "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"),
+    libraryDependencies += "com.lihaoyi" %% "upickle" % "3.2.0"
   )
 
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
