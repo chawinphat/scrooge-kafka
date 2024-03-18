@@ -1,5 +1,7 @@
 package main
 
+import com.google.protobuf.ByteString
+
 import scrooge.scrooge_message._
 import scrooge.scrooge_networking._
 
@@ -35,9 +37,25 @@ object Producer {
     }
   }
 
-  def writeToKafka(message: String): Unit = {
-    val message = new CrossChainMessage()
-    val seralizedMesage = message.toByteArray
+  def writeToKafka(messageString: String): Unit = {
+    val messageContent = messageString.getBytes("UTF-8")
+
+    /* Note: the attributes when creating CrossChainMessageData/CrossChainMessage objects must
+      camelCase eventhough it is snake_case in .proto files --> why? because ScalaPB 
+      (compiler for the .proto files) converts the field names from snake_case
+       to camelCase since Scala uses camelCase */
+    val messageData = CrossChainMessageData (
+      messageContent = ByteString.copyFrom(messageContent)
+      // Optionally add any other attributes (e.g. sequenceNumber)
+    )
+
+    val crossChainMessage = CrossChainMessage (
+      data = Seq(messageData)
+      // Optionally add any other attributes (e.g. validityProof, ackCount, ackSet)
+    )
+
+
+    val seralizedMesage = crossChainMessage.toByteArray
     val props = new Properties()
     props.put("bootstrap.servers", brokerIps)
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
