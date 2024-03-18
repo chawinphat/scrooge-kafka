@@ -9,20 +9,37 @@ import org.apache.kafka.clients.producer._
 object Producer {
   val configReader = new ConfigReader
 
+  val brokerIps = configReader.getBrokerIps()
+  val nodeId = configReader.getNodeId()
+  val rsmId = configReader.getRsmId()
+  val rsmSize = configReader.getRsmSize()
+
+  //rsm 1 writes to topic 1 (index 0), rsm 2 writes to topic 2
+  val topic = 
+    if (rsmId == 1) {
+      configReader.getTopic1()
+    } else {
+      configReader.getTopic2()
+    }
+
   def main(args: Array[String]): Unit = {
+
+    //temporary values until we do linux pipe
+    val message = "hello"
+    val tempRaftMsgId = 1
+
     while (true) {
-      writeToKafka(configReader.getTopic(), configReader.getMessage())
+      if (tempRaftMsgId % nodeId == rsmSize) {
+        writeToKafka(message)
+      }
     }
   }
 
-  def writeToKafka(topic: String, message: String): Unit = {
+  def writeToKafka(message: String): Unit = {
     val message = new CrossChainMessage()
-    //  val messageData = new CrossChainMessageData(messageContent)
-    //  message.addData(messageData)
     val seralizedMesage = message.toByteArray
-
     val props = new Properties()
-    props.put("bootstrap.servers", "localhost:9092")
+    props.put("bootstrap.servers", brokerIps)
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     val producer = new KafkaProducer[String, Array[Byte]](props)

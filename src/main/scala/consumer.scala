@@ -13,29 +13,41 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Consumer {
+
   val configReader = new ConfigReader
+
+  val brokerIps = configReader.getBrokerIps()
+  val nodeId = configReader.getNodeId()
+  val rsmId = configReader.getRsmId()
+
+  //rsm 1 reads from topic 2, rsm 2 reads from topic 1
+  val topic = 
+    if (rsmId == 1) {
+      configReader.getTopic1()
+    } else {
+      configReader.getTopic2()
+    }
 
   def main(args: Array[String]): Unit = {
     val timer = 10.seconds.fromNow
 
     // Run a new thread to measure throughput -> an optimization since polling may take a bit of time
     val throughputMeasurement = Future {
-      consumeFromKafka(configReader.getTopic(), timer)
+      consumeFromKafka(timer)
     }
 
     // Wait on new thread to finish
     Await.result(throughputMeasurement, Duration.Inf)
   }
 
-  def consumeFromKafka(topic: String, timer: Deadline) = {
+  def consumeFromKafka(timer: Deadline) = {
     val props = new Properties()
-    props.put("bootstrap.servers", "localhost:9092")
+    props.put("bootstrap.servers", brokerIps)
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
     props.put("group.id", "consumer-group")
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
-    consumer.subscribe(util.Arrays.asList(topic))
 
     var messagesDeserialized = 0
     var startTime = System.currentTimeMillis()

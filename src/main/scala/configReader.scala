@@ -16,11 +16,32 @@ class ConfigReader {
   }
   private val configData = ujson.read(jsonString)
 
-  def getTopic(): String = {
-    configData("topic").str
+  def getTopic1(): String = {
+    configData("topic1").str
+  }
+
+  def getTopic2(): String = {
+    configData("topic2").str
+  }
+
+  def getRsmId(): Double = {
+    configData("rsm_id").num
+  }
+
+  def getNodeId(): Double = {
+    configData("node_id").num
+  }
+
+  def getBrokerIps(): String = {
+    configData("broker_ips").str
   }
 
   def getMessage(): String = {
     configData("message").str
   }
+
+  def getRsmSize(): Double = {
+    configData("rsm_size").num
+  }
 }
+

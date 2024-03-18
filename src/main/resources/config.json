@@ -1,4 +1,9 @@
 {
-    "topic": "scrooge",
-    "message": "helloo"
+    "topic1": "scrooge",
+    "topci2": "kafka-test",
+    "rsm_id": 1,
+    "node_id": 1,
+    "broker_ips": "10.138.8.184:9092, 10.138.8.184:9092, 10.138.8.184:9092",
+    "message": "helloo",
+    "rsm_size": 3
 }
