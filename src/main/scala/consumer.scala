@@ -55,8 +55,13 @@ object Consumer {
     while (timer.hasTimeLeft()) {
       val record = consumer.poll(1000).asScala
       for (data <- record.iterator) {
-        val message = CrossChainMessage.parseFrom(data.value())
-        //println(message)
+        val crossChainMessage = CrossChainMessage.parseFrom(data.value())
+        val messageDataList = crossChainMessage.data
+        messageDataList.foreach { messageData =>
+          val messageContentBytes = messageData.messageContent.toByteArray()
+          val messageContent = new String(messageContentBytes, "UTF-8")
+          //println("Received Message: " + messageContent)
+        }
         messagesDeserialized += 1
       }
 
