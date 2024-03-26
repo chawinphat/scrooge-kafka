@@ -13,31 +13,35 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Consumer {
-
   val configReader = new ConfigReader
-
-  val brokerIps = configReader.getBrokerIps()
-  val nodeId = configReader.getNodeId()
   val rsmId = configReader.getRsmId()
+  val nodeId = configReader.getNodeId()
+  val topic = if (rsmId == 1) configReader.getTopic1() else configReader.getTopic2()
+  val brokerIps = configReader.getBrokerIps()
+  val rsmSize = configReader.getRsmSize()
+  val benchmarkDuration = configReader.getBenchmarkDuration()
+  val warmupDuration = configReader.getWarmupDuration()
+  val cooldownDuration = configReader.getCooldownDuration()
+  val outputPath = configReader.getOutputPath()
 
-  //rsm 1 reads from topic 2, rsm 2 reads from topic 1
-  val topic = 
-    if (rsmId == 1) {
-      configReader.getTopic1()
-    } else {
-      configReader.getTopic2()
-    }
+  val outputWriter = new OutputWriter
 
   def main(args: Array[String]): Unit = {
-    val timer = 10.seconds.fromNow
+
+    // Warmup period
+    val warmup = warmupDuration.seconds.fromNow
+    while (warmup.hasTimeLeft()) { } // Do nothing
 
     // Run a new thread to measure throughput -> an optimization since polling may take a bit of time
+    val benchmark = benchmarkDuration.seconds.fromNow
     val throughputMeasurement = Future {
-      consumeFromKafka(timer)
+      consumeFromKafka(benchmark)
     }
+    Await.result(throughputMeasurement, Duration.Inf) // Wait on new thread to finish
 
-    // Wait on new thread to finish
-    Await.result(throughputMeasurement, Duration.Inf)
+    // Cooldown period
+    val cooldown = cooldownDuration.seconds.fromNow
+    while (cooldown.hasTimeLeft()) { } // Do nothing
   }
 
   def consumeFromKafka(timer: Deadline) = {
@@ -48,9 +52,12 @@ object Consumer {
     props.put("auto.offset.reset", "latest")
     props.put("group.id", "consumer-group")
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
+    consumer.subscribe(util.Arrays.asList(topic))
 
     var messagesDeserialized = 0
     var startTime = System.currentTimeMillis()
+
+    var outputContent = ""
 
     while (timer.hasTimeLeft()) {
       val record = consumer.poll(1000).asScala
@@ -69,11 +76,15 @@ object Consumer {
       val currentTime = System.currentTimeMillis()
       if (currentTime - startTime >= 1000) {
         val throughput = messagesDeserialized.toDouble / ((currentTime - startTime).toDouble / 1000)
-        println(s"Throughput: ${throughput} MPS")
+        outputContent += s"Throughput: ${throughput} MPS\n"
+
         messagesDeserialized = 0
         startTime = currentTime
       }
     }   
     consumer.close()
+
+    println(outputContent)
+    outputWriter.writeOutput(outputContent, outputPath + "output.json")
   }
 }
