@@ -33,9 +33,9 @@ object Consumer {
     while (warmup.hasTimeLeft()) { } // Do nothing
 
     // Run a new thread to measure throughput -> an optimization since polling may take a bit of time
-    val timer = benchmarkDuration.seconds.fromNow
+    val benchmark = benchmarkDuration.seconds.fromNow
     val throughputMeasurement = Future {
-      consumeFromKafka(timer)
+      consumeFromKafka(benchmark)
     }
     Await.result(throughputMeasurement, Duration.Inf) // Wait on new thread to finish
 
@@ -46,12 +46,13 @@ object Consumer {
 
   def consumeFromKafka(timer: Deadline) = {
     val props = new Properties()
-    props.put("bootstrap.servers", brokerIps)
+    props.put("bootstrap.servers", "localhost:9092")
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
     props.put("group.id", "consumer-group")
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
+    consumer.subscribe(util.Arrays.asList(topic))
 
     var messagesDeserialized = 0
     var startTime = System.currentTimeMillis()
@@ -83,6 +84,7 @@ object Consumer {
     }   
     consumer.close()
 
-    outputWriter.writeOutput(outputContent, outputPath)
+    println(outputContent)
+    outputWriter.writeOutput(outputContent, outputPath + "output.json")
   }
 }

@@ -9,6 +9,8 @@ import org.apache.kafka.clients.producer._
 import java.util.Properties
 
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Producer {
   val configReader = new ConfigReader
@@ -29,50 +31,51 @@ object Producer {
       // TODO: implement read from Linux Pipe
     }
 
-    val tempRaftMsgId = 1
-
     // Warmup period
     val warmup = warmupDuration.seconds.fromNow
     while (warmup.hasTimeLeft()) { } // Do nothing 
 
     val benchmark = benchmarkDuration.seconds.fromNow
-    while (benchmark.hasTimeLeft()) {
-      if (tempRaftMsgId % nodeId == rsmSize) {
-        writeToKafka(message)
-      }
+    val produceMessages = Future { // Run on a separate thread
+      writeToKafka(message, benchmark)
     }
+    Await.result(produceMessages, Duration.Inf) // Wait on new thread to finish
 
     // Cooldown period
     val cooldown = cooldownDuration.seconds.fromNow
     while (cooldown.hasTimeLeft()) { } // Do nothing
   }
 
-  def writeToKafka(messageString: String): Unit = {
-    val messageContent = messageString.getBytes("UTF-8")
-
-    /* Note: the attributes when creating CrossChainMessageData/CrossChainMessage objects must
-      camelCase eventhough it is snake_case in .proto files --> why? because ScalaPB 
-      (compiler for the .proto files) converts the field names from snake_case
-       to camelCase since Scala uses camelCase */
-    val messageData = CrossChainMessageData (
-      messageContent = ByteString.copyFrom(messageContent)
-      // Optionally add any other attributes (e.g. sequenceNumber)
-    )
-
-    val crossChainMessage = CrossChainMessage (
-      data = Seq(messageData)
-      // Optionally add any other attributes (e.g. validityProof, ackCount, ackSet)
-    )
-
-
-    val seralizedMesage = crossChainMessage.toByteArray
+  def writeToKafka(messageString: String, timer: Deadline): Unit = {
     val props = new Properties()
-    props.put("bootstrap.servers", brokerIps)
+    props.put("bootstrap.servers", "localhost:9092")
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     val producer = new KafkaProducer[String, Array[Byte]](props)
-    val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
-    producer.send(record)
+
+    // Delete later when linux pipe implemented
+    val tempRaftMsgId = 1
+
+    while (timer.hasTimeLeft()) {
+      // For linux piping from raft
+      // if (tempRaftMsgId % nodeId == rsmSize) {
+      // }
+
+      val messageContent = messageString.getBytes("UTF-8")
+      val messageData = CrossChainMessageData (
+        messageContent = ByteString.copyFrom(messageContent)
+        // Optionally add any other attributes (e.g. sequenceNumber)
+      )
+      val crossChainMessage = CrossChainMessage (
+        data = Seq(messageData)
+        // Optionally add any other attributes (e.g. validityProof, ackCount, ackSet)
+      )
+      val seralizedMesage = crossChainMessage.toByteArray
+
+      val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
+      producer.send(record)
+    }
+
     producer.close()
   }
 }
