@@ -36,12 +36,32 @@ class ConfigReader {
     configData("broker_ips").str
   }
 
+  def getRsmSize(): Double = {
+    configData("rsm_size").num
+  }
+
   def getMessage(): String = {
     configData("message").str
   }
 
-  def getRsmSize(): Double = {
-    configData("rsm_size").num
+  def shouldReadFromPipe(): Boolean = {
+    configData("read_from_pipe").bool
+  }
+
+  def getBenchmarkDuration(): Double = {
+    configData("benchmark_duration").num
+  }
+
+  def getWarmupDuration(): Double = {
+    configData("warmup_duration").num
+  }
+
+  def getCooldownDuration(): Double = {
+    configData("cooldown_duration").num
+  }
+
+  def getOutputPath(): String = {
+    configData("output_path").str
   }
 }
 

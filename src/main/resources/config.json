@@ -1,9 +1,14 @@
 {
     "topic1": "scrooge",
-    "topci2": "kafka-test",
+    "topic2": "kafka-test",
     "rsm_id": 1,
     "node_id": 1,
     "broker_ips": "10.138.8.184:9092, 10.138.8.184:9092, 10.138.8.184:9092",
+    "rsm_size": 3,
+    "read_from_pipe": true,
     "message": "helloo",
-    "rsm_size": 3
+    "benchmark_duration": 10,
+    "warmup_duration": 3,
+    "cooldown_duration": 3,
+    "output_path": "./"
 }
