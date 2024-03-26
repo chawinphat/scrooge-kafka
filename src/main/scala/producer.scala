@@ -5,36 +5,46 @@ import com.google.protobuf.ByteString
 import scrooge.scrooge_message._
 import scrooge.scrooge_networking._
 
-import java.util.Properties
 import org.apache.kafka.clients.producer._
+import java.util.Properties
+
+import scala.concurrent.duration._
 
 object Producer {
   val configReader = new ConfigReader
-
-  val brokerIps = configReader.getBrokerIps()
-  val nodeId = configReader.getNodeId()
   val rsmId = configReader.getRsmId()
+  val nodeId = configReader.getNodeId()
+  val topic = if (rsmId == 1) configReader.getTopic1() else configReader.getTopic2()
+  val brokerIps = configReader.getBrokerIps()
   val rsmSize = configReader.getRsmSize()
-
-  //rsm 1 writes to topic 1 (index 0), rsm 2 writes to topic 2
-  val topic = 
-    if (rsmId == 1) {
-      configReader.getTopic1()
-    } else {
-      configReader.getTopic2()
-    }
+  val benchmarkDuration = configReader.getBenchmarkDuration()
+  val warmupDuration = configReader.getWarmupDuration()
+  val cooldownDuration = configReader.getCooldownDuration()
 
   def main(args: Array[String]): Unit = {
 
-    //temporary values until we do linux pipe
-    val message = "hello"
+    // if config set to reading from pipe, read from pipe, else set to message
+    val message = configReader.getMessage()
+    if (configReader.shouldReadFromPipe()) {
+      // TODO: implement read from Linux Pipe
+    }
+
     val tempRaftMsgId = 1
 
-    while (true) {
+    // Warmup period
+    val warmup = warmupDuration.seconds.fromNow
+    while (warmup.hasTimeLeft()) { } // Do nothing 
+
+    val benchmark = benchmarkDuration.seconds.fromNow
+    while (benchmark.hasTimeLeft()) {
       if (tempRaftMsgId % nodeId == rsmSize) {
         writeToKafka(message)
       }
     }
+
+    // Cooldown period
+    val cooldown = cooldownDuration.seconds.fromNow
+    while (cooldown.hasTimeLeft()) { } // Do nothing
   }
 
   def writeToKafka(messageString: String): Unit = {
