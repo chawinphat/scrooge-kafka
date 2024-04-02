@@ -60,6 +60,10 @@ class ConfigReader {
     configData("cooldown_duration").num
   }
 
+  def getInputPath(): String = {
+    configData("input_path").str
+  }
+
   def getOutputPath(): String = {
     configData("output_path").str
   }
