@@ -4,13 +4,17 @@ import com.google.protobuf.ByteString
 
 import scrooge.scrooge_message._
 import scrooge.scrooge_networking._
+import scrooge.scrooge_request._
 
 import org.apache.kafka.clients.producer._
 import java.util.Properties
+import java.util.Base64
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.io.Source
 
 object Producer {
   val configReader = new ConfigReader
@@ -22,22 +26,16 @@ object Producer {
   val benchmarkDuration = configReader.getBenchmarkDuration()
   val warmupDuration = configReader.getWarmupDuration()
   val cooldownDuration = configReader.getCooldownDuration()
+  val inputPath = configReader.getInputPath() // Path to Linux pipe
 
   def main(args: Array[String]): Unit = {
-
-    // if config set to reading from pipe, read from pipe, else set to message
-    val message = configReader.getMessage()
-    if (configReader.shouldReadFromPipe()) {
-      // TODO: implement read from Linux Pipe
-    }
 
     // Warmup period
     val warmup = warmupDuration.seconds.fromNow
     while (warmup.hasTimeLeft()) { } // Do nothing 
 
-    val benchmark = benchmarkDuration.seconds.fromNow
     val produceMessages = Future { // Run on a separate thread
-      writeToKafka(message, benchmark)
+      writeToKafka()
     }
     Await.result(produceMessages, Duration.Inf) // Wait on new thread to finish
 
@@ -46,36 +44,58 @@ object Producer {
     while (cooldown.hasTimeLeft()) { } // Do nothing
   }
 
-  def writeToKafka(messageString: String, timer: Deadline): Unit = {
+  def writeToKafka(): Unit = {
     val props = new Properties()
     props.put("bootstrap.servers", brokerIps)
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     val producer = new KafkaProducer[String, Array[Byte]](props)
 
-    // Delete later when linux pipe implemented
-    val tempRaftMsgId = 1
+    if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
+      val linuxPipe = Source.fromFile(inputPath)
+      val timer = benchmarkDuration.seconds.fromNow
 
-    while (timer.hasTimeLeft()) {
-      // For linux piping from raft
-      // if (tempRaftMsgId % nodeId == rsmSize) {
-      // }
+      while (timer.hasTimeLeft()) {
+        var protobufStr = linuxPipe.getLines().next
+        protobufStr = protobufStr.split(" ").last
 
-      val messageContent = messageString.getBytes("UTF-8")
-      val messageData = CrossChainMessageData (
-        messageContent = ByteString.copyFrom(messageContent)
-        // Optionally add any other attributes (e.g. sequenceNumber)
-      )
-      val crossChainMessage = CrossChainMessage (
-        data = Seq(messageData)
-        // Optionally add any other attributes (e.g. validityProof, ackCount, ackSet)
-      )
-      val seralizedMesage = crossChainMessage.toByteArray
+        val protobufStrBytes = Base64.getDecoder.decode(protobufStr)
+        val messageData = CrossChainMessageData.parseFrom(protobufStrBytes)
 
-      val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
-      producer.send(record)
+        if (messageData.sequenceNumber % rsmSize == rsmId) {
+          val crossChainMessage = CrossChainMessage (
+            data = Seq(messageData)
+          )
+          val seralizedMesage = crossChainMessage.toByteArray
+
+          val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
+          producer.send(record)
+        }
+      }
+
+      linuxPipe.close()
+    } else { // Send message from config
+      val timer = benchmarkDuration.seconds.fromNow
+
+      while (timer.hasTimeLeft()) {
+        val messageStr = configReader.getMessage()
+  
+        val messageStrBytes = messageStr.getBytes("UTF-8")
+        val messageData = CrossChainMessageData (
+          messageContent = ByteString.copyFrom(messageStrBytes)
+          // Optionally add any other attributes (e.g. sequenceNumber)
+        )
+  
+        val crossChainMessage = CrossChainMessage (
+          data = Seq(messageData)
+        )
+        val seralizedMesage = crossChainMessage.toByteArray
+  
+        val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
+        producer.send(record)
+      }
     }
-
+    
     producer.close()
   }
 }
