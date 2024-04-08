@@ -46,7 +46,7 @@ object Consumer {
 
   def consumeFromKafka(timer: Deadline) = {
     val props = new Properties()
-    props.put("bootstrap.servers", "localhost:9092")
+    props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
@@ -67,7 +67,7 @@ object Consumer {
         messageDataList.foreach { messageData =>
           val messageContentBytes = messageData.messageContent.toByteArray()
           val messageContent = new String(messageContentBytes, "UTF-8")
-          //println("Received Message: " + messageContent)
+          // println(s"Received Message: $messageContent")
         }
         messagesDeserialized += 1
       }
@@ -84,7 +84,7 @@ object Consumer {
     }   
     consumer.close()
 
-    println(outputContent)
+    // println(outputContent)
     outputWriter.writeOutput(outputContent, outputPath + "output.json")
   }
 }

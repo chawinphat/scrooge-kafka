@@ -16,8 +16,6 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.io.Source
-
 object Producer {
   val configReader = new ConfigReader
   val rsmId = configReader.getRsmId()
@@ -48,7 +46,7 @@ object Producer {
 
   def writeToKafka(): Unit = {
     val props = new Properties()
-    props.put("bootstrap.servers", "localhost:9092")
+    props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     val producer = new KafkaProducer[String, Array[Byte]](props)
@@ -75,19 +73,31 @@ object Producer {
         val protobufStrBytes = new Array[Byte](protobufStrSize.toInt)
         protobufStrBuffer.get(protobufStrBytes)
         val protobufStr = new String(protobufStrBytes)        
-    
-        println(s"protobufStr: $protobufStr")
         
-        val messageData = CrossChainMessageData.parseFrom(protobufStrBytes)
-        if (messageData.sequenceNumber % rsmSize == rsmId) {
-          println(s"sending message")
-          val crossChainMessage = CrossChainMessage (
-            data = Seq(messageData)
-          )
-          val seralizedMesage = crossChainMessage.toByteArray
+        val scroogeReq = ScroogeRequest.parseFrom(protobufStrBytes)
+        val maybeCrossChainMessageData = scroogeReq.request match {
+          case ScroogeRequest.Request.SendMessageRequest(sendMessageRequest) => 
+            Some(sendMessageRequest.content)
+          case _ => 
+            None
+        }
 
-          val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
-          producer.send(record)
+        maybeCrossChainMessageData match {
+          case Some(v) =>
+            val crossChainMessageData = v.get
+            if (crossChainMessageData.sequenceNumber % rsmSize == rsmId) {
+              // println(s"sending message with content: ${crossChainMessageData.messageContent}")
+              val crossChainMessage = CrossChainMessage (
+                data = Seq(crossChainMessageData)
+              )
+              val seralizedMesage = crossChainMessage.toByteArray
+
+              val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
+              producer.send(record)
+            }
+            
+          case None =>
+            println("CrossChainMessageData not found")
         }
       }
 
