@@ -8,7 +8,9 @@ import scrooge.scrooge_request._
 
 import org.apache.kafka.clients.producer._
 import java.util.Properties
-import java.util.Base64
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.io.RandomAccessFile
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -52,16 +54,27 @@ object Producer {
     val producer = new KafkaProducer[String, Array[Byte]](props)
 
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
-      val linuxPipe = Source.fromFile(inputPath)
+      val linuxPipe = new RandomAccessFile(inputPath, "r")
+      val linuxChannel = linuxPipe.getChannel
+
+      val sizeBuffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
+      val protobufStrBuffer = ByteBuffer.allocate(4096).order(ByteOrder.LITTLE_ENDIAN)
       val timer = benchmarkDuration.seconds.fromNow
-
       while (timer.hasTimeLeft()) {
-        var protobufStr = linuxPipe.getLines().next
-        protobufStr = protobufStr.split(" ").last
+        sizeBuffer.clear()
+        protobufStrBuffer.clear()
 
-        val protobufStrBytes = Base64.getDecoder.decode(protobufStr)
+        while (linuxChannel.read(sizeBuffer) < 8) { }
+        sizeBuffer.flip()
+        val protobufStrSize = sizeBuffer.getLong
+
+        protobufStrBuffer.limit(protobufStrSize.toInt)
+        while (linuxChannel.read(protobufStrBuffer) < protobufStrSize) { }
+        protobufStrBuffer.flip()
+        val protobufStrBytes = new Array[Byte](protobufStrSize.toInt)
+        protobufStrBuffer.get(protobufStrBytes)
+
         val messageData = CrossChainMessageData.parseFrom(protobufStrBytes)
-
         if (messageData.sequenceNumber % rsmSize == rsmId) {
           val crossChainMessage = CrossChainMessage (
             data = Seq(messageData)
