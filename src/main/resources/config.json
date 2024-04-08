@@ -10,6 +10,6 @@
     "benchmark_duration": 10,
     "warmup_duration": 3,
     "cooldown_duration": 3,
-    "input_path": "./",
+    "input_path": "./input.txt",
     "output_path": "./"
 }

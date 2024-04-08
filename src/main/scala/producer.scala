@@ -48,7 +48,7 @@ object Producer {
 
   def writeToKafka(): Unit = {
     val props = new Properties()
-    props.put("bootstrap.servers", brokerIps)
+    props.put("bootstrap.servers", "localhost:9092")
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     val producer = new KafkaProducer[String, Array[Byte]](props)
@@ -59,6 +59,7 @@ object Producer {
 
       val sizeBuffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
       val protobufStrBuffer = ByteBuffer.allocate(4096).order(ByteOrder.LITTLE_ENDIAN)
+      
       val timer = benchmarkDuration.seconds.fromNow
       while (timer.hasTimeLeft()) {
         sizeBuffer.clear()
@@ -73,9 +74,13 @@ object Producer {
         protobufStrBuffer.flip()
         val protobufStrBytes = new Array[Byte](protobufStrSize.toInt)
         protobufStrBuffer.get(protobufStrBytes)
-
+        val protobufStr = new String(protobufStrBytes)        
+    
+        println(s"protobufStr: $protobufStr")
+        
         val messageData = CrossChainMessageData.parseFrom(protobufStrBytes)
         if (messageData.sequenceNumber % rsmSize == rsmId) {
+          println(s"sending message")
           val crossChainMessage = CrossChainMessage (
             data = Seq(messageData)
           )
