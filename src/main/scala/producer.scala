@@ -49,9 +49,11 @@ object Producer {
     props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
+    props.put("num.partitions", 4) 
     val producer = new KafkaProducer[String, Array[Byte]](props)
-
+    println(s"Parititions for producer: ${producer.partitionsFor(topic)}")
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
+      println(s"PIPE CODE HAS NOT BEEN UPDATED WITH PARTITIONS!!!!")
       val linuxPipe = new RandomAccessFile(inputPath, "r")
       val linuxChannel = linuxPipe.getChannel
 
@@ -86,7 +88,7 @@ object Producer {
           case Some(v) =>
             val crossChainMessageData = v.get
             if (crossChainMessageData.sequenceNumber % rsmSize == rsmId) {
-              // println(s"sending message with content: ${crossChainMessageData.messageContent}")
+              println(s"Sending message with content: ${crossChainMessageData.messageContent}")
               val crossChainMessage = CrossChainMessage (
                 data = Seq(crossChainMessageData)
               )
@@ -104,10 +106,10 @@ object Producer {
       linuxPipe.close()
     } else { // Send message from config
       val timer = benchmarkDuration.seconds.fromNow
-
+      var totalMessages = 0
       while (timer.hasTimeLeft()) {
+        //println(s"Timer is going!")
         val messageStr = configReader.getMessage()
-  
         val messageStrBytes = messageStr.getBytes("UTF-8")
         val messageData = CrossChainMessageData (
           messageContent = ByteString.copyFrom(messageStrBytes)
@@ -118,10 +120,16 @@ object Producer {
           data = Seq(messageData)
         )
         val seralizedMesage = crossChainMessage.toByteArray
-  
-        val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
+        val key = null //"nextsemester"
+        //println(s"Sending message with content: ${messageData.messageContent}") 
+        //println(s"Topic: ${topic}")
+        val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, key, seralizedMesage)
         producer.send(record)
+        totalMessages += 1
       }
+      println(s"Summar info:")
+      println(s"Total number of messages sent: ${totalMessages}")
+      println(s"Topic: ${topic}")
     }
     
     producer.close()
