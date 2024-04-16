@@ -57,7 +57,7 @@ object Consumer {
     TopicPartition partition2 = new TopicPartition(topic, 2);
     TopicPartition partition3 = new TopicPartition(topic, 3);
     */
-    if (nodeId == 0) {
+/*    if (nodeId == 0) {
         println(s"Partition 0!")
         consumer.assign(util.Arrays.asList(new TopicPartition(topic, 0)))
     } else if (nodeId == 1) {
@@ -69,8 +69,8 @@ object Consumer {
     } else {
         println(s"Partition 3!")
         consumer.assign(util.Arrays.asList(new TopicPartition(topic, 3)))
-    }
-    //consumer.subscribe(util.Arrays.asList(topic))
+    }*/
+    consumer.subscribe(util.Arrays.asList(topic))
 
     var messagesDeserialized = 0
     var totalMessages = 0
@@ -79,12 +79,12 @@ object Consumer {
     var outputContent = ""
 
     while (timer.hasTimeLeft()) {
-      println(s"Made it inside timer for loop!")
+      //println(s"Made it inside timer for loop!")
       val record = consumer.poll(1000).asScala
       for (data <- record.iterator) {
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
-        println(s"Received a message!")
+        //println(s"Received a message!")
         messageDataList.foreach { messageData =>
           val messageContentBytes = messageData.messageContent.toByteArray()
           val messageContent = new String(messageContentBytes, "UTF-8")
