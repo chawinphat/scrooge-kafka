@@ -116,6 +116,6 @@ object Consumer {
     // println(jsonString)
     // Create json file
     val jsonString: String = upickle.default.write(jsonMap)
-    outputWriter.writeOutput(jsonString, outputPath + "output.json")
+    outputWriter.writeOutput(jsonString, outputPath)
   }
 }
