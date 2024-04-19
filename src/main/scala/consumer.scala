@@ -117,7 +117,6 @@ object Consumer {
     // Create json file
     val jsonString: String = upickle.default.write(jsonMap)
     outputWriter.writeOutput(jsonString, outputPath) // This one is for Raft
-    outputWriter.writeOutput(jsonString, outputPath + "output.json") // Testing
-    outputWriter.writeOutput(jsonString, "./" + "output.json") // This one is for local read
+    outputWriter.writeOutput(jsonString, "/tmp/" + "output.json") // This one is for local read
   }
 }
