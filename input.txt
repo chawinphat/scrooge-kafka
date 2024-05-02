@@ -1,0 +1,52 @@
+==> log_0_0_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328057647,\"Total_Messages\":503064,\"Overall_Throughput_MPS\":25444.539982803093,\"Start_Time_MS\":1713328037876,\"Final_Elapsed_Time_S\":19.771}"}
+==> log_0_10_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058145,\"Total_Messages\":498171,\"Overall_Throughput_MPS\":25190.68567961165,\"Start_Time_MS\":1713328038369,\"Final_Elapsed_Time_S\":19.776}"}
+==> log_0_11_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328057347,\"Total_Messages\":501280,\"Overall_Throughput_MPS\":25358.15459328207,\"Start_Time_MS\":1713328037579,\"Final_Elapsed_Time_S\":19.768}"}
+==> log_0_12_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328059279,\"Total_Messages\":549822,\"Overall_Throughput_MPS\":27888.511285822977,\"Start_Time_MS\":1713328039564,\"Final_Elapsed_Time_S\":19.715}"}
+==> log_0_1_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328054978,\"Total_Messages\":384660,\"Overall_Throughput_MPS\":19442.001516300228,\"Start_Time_MS\":1713328035193,\"Final_Elapsed_Time_S\":19.785}"}
+==> log_0_2_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328056076,\"Total_Messages\":450376,\"Overall_Throughput_MPS\":22830.43544380798,\"Start_Time_MS\":1713328036349,\"Final_Elapsed_Time_S\":19.727}"}
+==> log_0_3_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328056649,\"Total_Messages\":457947,\"Overall_Throughput_MPS\":23187.189873417723,\"Start_Time_MS\":1713328036899,\"Final_Elapsed_Time_S\":19.75}"}
+==> log_0_4_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328056330,\"Total_Messages\":448154,\"Overall_Throughput_MPS\":22725.862068965518,\"Start_Time_MS\":1713328036610,\"Final_Elapsed_Time_S\":19.72}"}
+==> log_0_5_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328057916,\"Total_Messages\":496637,\"Overall_Throughput_MPS\":25127.093346825197,\"Start_Time_MS\":1713328038151,\"Final_Elapsed_Time_S\":19.765}"}
+==> log_0_6_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058564,\"Total_Messages\":527321,\"Overall_Throughput_MPS\":26733.63751584284,\"Start_Time_MS\":1713328038839,\"Final_Elapsed_Time_S\":19.725}"}
+==> log_0_7_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058129,\"Total_Messages\":513584,\"Overall_Throughput_MPS\":25975.31863240947,\"Start_Time_MS\":1713328038357,\"Final_Elapsed_Time_S\":19.772}"}
+==> log_0_8_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058061,\"Total_Messages\":530948,\"Overall_Throughput_MPS\":26951.675126903556,\"Start_Time_MS\":1713328038361,\"Final_Elapsed_Time_S\":19.7}"}
+==> log_0_9_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058080,\"Total_Messages\":484838,\"Overall_Throughput_MPS\":24521.444466922923,\"Start_Time_MS\":1713328038308,\"Final_Elapsed_Time_S\":19.772}"}
+==> log_1_0_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058539,\"Total_Messages\":518368,\"Overall_Throughput_MPS\":26241.166346056492,\"Start_Time_MS\":1713328038785,\"Final_Elapsed_Time_S\":19.754}"}
+==> log_1_10_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058804,\"Total_Messages\":533954,\"Overall_Throughput_MPS\":27034.27674548124,\"Start_Time_MS\":1713328039053,\"Final_Elapsed_Time_S\":19.751}"}
+==> log_1_11_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328055844,\"Total_Messages\":424348,\"Overall_Throughput_MPS\":21698.010942373578,\"Start_Time_MS\":1713328036287,\"Final_Elapsed_Time_S\":19.557}"}
+==> log_1_12_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328059016,\"Total_Messages\":519945,\"Overall_Throughput_MPS\":26291.71723300971,\"Start_Time_MS\":1713328039240,\"Final_Elapsed_Time_S\":19.776}"}
+==> log_1_1_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058137,\"Total_Messages\":516371,\"Overall_Throughput_MPS\":26169.21751469694,\"Start_Time_MS\":1713328038405,\"Final_Elapsed_Time_S\":19.732}"}
+==> log_1_2_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058475,\"Total_Messages\":514861,\"Overall_Throughput_MPS\":26058.35610891791,\"Start_Time_MS\":1713328038717,\"Final_Elapsed_Time_S\":19.758}"}
+==> log_1_3_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058853,\"Total_Messages\":560628,\"Overall_Throughput_MPS\":28402.046709559752,\"Start_Time_MS\":1713328039114,\"Final_Elapsed_Time_S\":19.739}"}
+==> log_1_4_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328057960,\"Total_Messages\":499352,\"Overall_Throughput_MPS\":25259.34543983004,\"Start_Time_MS\":1713328038191,\"Final_Elapsed_Time_S\":19.769}"}
+==> log_1_5_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328057179,\"Total_Messages\":441653,\"Overall_Throughput_MPS\":22364.441968806965,\"Start_Time_MS\":1713328037431,\"Final_Elapsed_Time_S\":19.748}"}
+==> log_1_6_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328057511,\"Total_Messages\":475110,\"Overall_Throughput_MPS\":24036.729737933827,\"Start_Time_MS\":1713328037745,\"Final_Elapsed_Time_S\":19.766}"}
+==> log_1_7_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328058577,\"Total_Messages\":546468,\"Overall_Throughput_MPS\":27648.26713888186,\"Start_Time_MS\":1713328038812,\"Final_Elapsed_Time_S\":19.765}"}
+==> log_1_8_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328057996,\"Total_Messages\":500708,\"Overall_Throughput_MPS\":25388.297332927694,\"Start_Time_MS\":1713328038274,\"Final_Elapsed_Time_S\":19.722}"}
+==> log_1_9_0.yaml <==
+{"content":"{\"Final_Time_MS\":1713328057897,\"Total_Messages\":504976,\"Overall_Throughput_MPS\":25628.095818108,\"Start_Time_MS\":1713328038193,\"Final_Elapsed_Time_S\":19.704}"}
