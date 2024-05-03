@@ -24,6 +24,7 @@ object Consumer {
   val cooldownDuration = configReader.getCooldownDuration()
   val outputPath = configReader.getOutputPath()
 
+  val pipeWriter = new PipeWriter
   val outputWriter = new OutputWriter
 
   def main(args: Array[String]): Unit = {
@@ -116,7 +117,7 @@ object Consumer {
     // println(jsonString)
     // Create json file
     val jsonString: String = upickle.default.write(jsonMap)
-    outputWriter.writeOutput(jsonString, outputPath) // This one is for Raft
+    pipeWriter.writeOutput(jsonString, outputPath) // This one is for Raft
     outputWriter.writeOutput(jsonString, "/tmp/" + "output.json") // This one is for local read
   }
 }

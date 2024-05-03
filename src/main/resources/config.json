@@ -11,5 +11,5 @@
     "warmup_duration": 3,
     "cooldown_duration": 3,
     "input_path": "./",
-    "output_path": "./"
+    "output_path": "/tmp/scrooge-output"
 }
