@@ -10,6 +10,6 @@
     "benchmark_duration": 10,
     "warmup_duration": 3,
     "cooldown_duration": 3,
-    "input_path": "./",
+    "input_path": "/tmp/scrooge-input",
     "output_path": "/tmp/scrooge-output"
 }

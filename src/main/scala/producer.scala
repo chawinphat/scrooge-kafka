@@ -46,15 +46,12 @@ object Producer {
 
   def writeToKafka(): Unit = {
     val props = new Properties()
-    props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
+    props.put("bootstrap.servers", "localhost:9092") // To test locally, change brokerIps with "localhost:9092"
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
-    props.put("num.partitions", 4) 
-    //props.put("acks", "0")
+
     val producer = new KafkaProducer[String, Array[Byte]](props)
-    //println(s"Parititions for producer: ${producer.partitionsFor(topic)}")
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
-      println(s"PIPE CODE HAS NOT BEEN UPDATED WITH PARTITIONS!!!!")
       val linuxPipe = new RandomAccessFile(inputPath, "r")
       val linuxChannel = linuxPipe.getChannel
 
@@ -89,7 +86,7 @@ object Producer {
           case Some(v) =>
             val crossChainMessageData = v.get
             if (crossChainMessageData.sequenceNumber % rsmSize == rsmId) {
-              //println(s"Sending message with content: ${crossChainMessageData.messageContent}")
+              println(s"Sending message with content: ${crossChainMessageData.messageContent}")
               val crossChainMessage = CrossChainMessage (
                 data = Seq(crossChainMessageData)
               )
@@ -121,9 +118,7 @@ object Producer {
           data = Seq(messageData)
         )
         val seralizedMesage = crossChainMessage.toByteArray
-        //val key = null //"nextsemester"
-        //println(s"Sending message with content: ${messageData.messageContent}") 
-        //println(s"Topic: ${topic}")
+        println(s"Sending message with content: ${messageData.messageContent}") 
         val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
         producer.send(record)
         totalMessages += 1

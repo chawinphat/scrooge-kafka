@@ -11,12 +11,12 @@ import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.apache.kafka.common.TopicPartition
+
 object Consumer {
   val configReader = new ConfigReader
   val rsmId = configReader.getRsmId()
   val nodeId = configReader.getNodeId()
-  val topic = if (rsmId == 1) configReader.getTopic2() else configReader.getTopic1()
+  val topic = if (rsmId == 1) configReader.getTopic1() else configReader.getTopic2()
   val brokerIps = configReader.getBrokerIps()
   val rsmSize = configReader.getRsmSize()
   val benchmarkDuration = configReader.getBenchmarkDuration()
@@ -47,77 +47,55 @@ object Consumer {
 
   def consumeFromKafka(timer: Deadline) = {
     val props = new Properties()
-    props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
+    props.put("bootstrap.servers", "localhost:9092") // To test locally, change brokerIps with "localhost:9092"
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
     props.put("group.id", "consumer-group")
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
-    /*TopicPartition partition0 = new TopicPartition(topic, 0);
-    TopicPartition partition1 = new TopicPartition(topic, 1);
-    TopicPartition partition2 = new TopicPartition(topic, 2);
-    TopicPartition partition3 = new TopicPartition(topic, 3);
-    */
-/*    if (nodeId == 0) {
-        println(s"Partition 0!")
-        consumer.assign(util.Arrays.asList(new TopicPartition(topic, 0)))
-    } else if (nodeId == 1) {
-        println(s"Partition 1!")
-        consumer.assign(util.Arrays.asList(new TopicPartition(topic, 1)))
-    } else if (nodeId == 2) {
-        println(s"Partition 2!")
-        consumer.assign(util.Arrays.asList(new TopicPartition(topic, 2)))
-    } else {
-        println(s"Partition 3!")
-        consumer.assign(util.Arrays.asList(new TopicPartition(topic, 3)))
-    }*/
     consumer.subscribe(util.Arrays.asList(topic))
 
     var messagesDeserialized = 0
-    var totalMessages = 0
     var startTime = System.currentTimeMillis()
-    var jsonMap: Map[String, Double] = Map("Start_Time_MS" -> startTime.toDouble) 
-    var outputContent = ""
+
+    var outputContent: Map[String, Double] = Map("Start_Time_MS" -> startTime.toDouble) 
 
     while (timer.hasTimeLeft()) {
-      //println(s"Made it inside timer for loop!")
       val record = consumer.poll(1000).asScala
       for (data <- record.iterator) {
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
-        //println(s"Received a message!")
         messageDataList.foreach { messageData =>
           val messageContentBytes = messageData.messageContent.toByteArray()
           val messageContent = new String(messageContentBytes, "UTF-8")
-          println(s"Message Contents: $messageContent")
+          println(s"Received Message: $messageContent")
         }
         messagesDeserialized += 1
-        totalMessages += 1
       }
-
-      // At every second of the test, meausure how many bytes have been deserialized
-      /*val currentTime = System.currentTimeMillis()
-      if (currentTime - startTime >= 1000) {
-        val throughput = messagesDeserialized.toDouble / ((currentTime - startTime).toDouble / 1000)
-        outputContent += s"Throughput: ${throughput} MPS\n"
-        //jsonMap += ("Throughput_MPS" -> throughput.toDouble)
-        //jsonMap += ("TimeElapsed_MS" -> (currentTime - startTime).toDouble)
-        messagesDeserialized = 0
-        startTime = currentTime
-      }*/
-    }
-    jsonMap += ("Total_Messages" -> totalMessages.toDouble)
-    val finalTime = System.currentTimeMillis()
-    val overallThroughput = totalMessages.toDouble / ((finalTime - startTime).toDouble/1000)
-    jsonMap += ("Overall_Throughput_MPS" -> overallThroughput.toDouble)
-    jsonMap += ("Final_Time_MS" -> finalTime.toDouble)
-    jsonMap += ("Final_Elapsed_Time_S" -> ((finalTime - startTime).toDouble/ 1000))   
+    }   
     consumer.close()
 
+    /* Example output:
+      { 
+        "Final_Time_MS":1714784527496,
+        "Total_Messages":0,
+        "Overall_Throughput_MPS":0,
+        "Start_Time_MS":1714784517478,
+        "Final_Elapsed_Time_S":10.018
+      }
+    */
+    val finalTime = System.currentTimeMillis()
+    val overallThroughput = messagesDeserialized.toDouble / ((finalTime - startTime).toDouble/1000)
+
+    outputContent += ("Final_Time_MS" -> finalTime.toDouble)
+    outputContent += ("Total_Messages" -> messagesDeserialized.toDouble)
+    outputContent += ("Final_Elapsed_Time_S" -> ((finalTime - startTime).toDouble/ 1000))   
+    outputContent += ("Overall_Throughput_MPS" -> overallThroughput.toDouble)
+
+    val jsonString: String = upickle.default.write(outputContent)
+
     // println(jsonString)
-    // Create json file
-    val jsonString: String = upickle.default.write(jsonMap)
     pipeWriter.writeOutput(jsonString, outputPath) // This one is for Raft
-    outputWriter.writeOutput(jsonString, "/tmp/" + "output.json") // This one is for local read
+    outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
   }
 }
