@@ -68,7 +68,7 @@ object Consumer {
         messageDataList.foreach { messageData =>
           val messageContentBytes = messageData.messageContent.toByteArray()
           val messageContent = new String(messageContentBytes, "UTF-8")
-          println(s"Received Message: $messageContent")
+          // println(s"Received Message: $messageContent")
         }
         messagesDeserialized += 1
       }

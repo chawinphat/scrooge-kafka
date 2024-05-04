@@ -86,7 +86,7 @@ object Producer {
           case Some(v) =>
             val crossChainMessageData = v.get
             if (crossChainMessageData.sequenceNumber % rsmSize == rsmId) {
-              println(s"Sending message with content: ${crossChainMessageData.messageContent}")
+              // println(s"Sending message with content: ${crossChainMessageData.messageContent}")
               val crossChainMessage = CrossChainMessage (
                 data = Seq(crossChainMessageData)
               )
@@ -104,9 +104,8 @@ object Producer {
       linuxPipe.close()
     } else { // Send message from config
       val timer = benchmarkDuration.seconds.fromNow
-      var totalMessages = 0
+
       while (timer.hasTimeLeft()) {
-        //println(s"Timer is going!")
         val messageStr = configReader.getMessage()
         val messageStrBytes = messageStr.getBytes("UTF-8")
         val messageData = CrossChainMessageData (
@@ -118,14 +117,10 @@ object Producer {
           data = Seq(messageData)
         )
         val seralizedMesage = crossChainMessage.toByteArray
-        println(s"Sending message with content: ${messageData.messageContent}") 
+        // println(s"Sending message with content: ${messageData.messageContent}") 
         val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
         producer.send(record)
-        totalMessages += 1
       }
-      println(s"Summar info:")
-      println(s"Total number of messages sent: ${totalMessages}")
-      println(s"Topic: ${topic}")
     }
     
     producer.close()
