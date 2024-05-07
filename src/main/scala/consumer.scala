@@ -59,16 +59,18 @@ object Consumer {
     var startTime = System.currentTimeMillis()
 
     var outputContent: Map[String, Double] = Map("Start_Time_MS" -> startTime.toDouble) 
-
+    println("starting timer")
     while (timer.hasTimeLeft()) {
       val record = consumer.poll(1000).asScala
+      println("polling for data")
       for (data <- record.iterator) {
+        println("data found")
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
         messageDataList.foreach { messageData =>
           val messageContentBytes = messageData.messageContent.toByteArray()
           val messageContent = new String(messageContentBytes, "UTF-8")
-          // println(s"Received Message: $messageContent")
+          println(s"Received Message: $messageContent")
         }
         messagesDeserialized += 1
       }
@@ -94,7 +96,7 @@ object Consumer {
 
     val jsonString: String = upickle.default.write(outputContent)
 
-    // println(jsonString)
+    println(jsonString)
     pipeWriter.writeOutput(jsonString, outputPath) // This one is for Raft
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
   }

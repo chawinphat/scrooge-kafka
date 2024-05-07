@@ -53,30 +53,38 @@ object Producer {
     val producer = new KafkaProducer[String, Array[Byte]](props)
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
       val linuxPipe = new RandomAccessFile(inputPath, "r")
+      if (linuxPipe != null) {
+        println("Pipe exists!")
+      }
       val linuxChannel = linuxPipe.getChannel
 
       val sizeBuffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
       val protobufStrBuffer = ByteBuffer.allocate(4096).order(ByteOrder.LITTLE_ENDIAN)
       
       val timer = benchmarkDuration.seconds.fromNow
+      println("starting timer")
       while (timer.hasTimeLeft()) {
+
         sizeBuffer.clear()
         protobufStrBuffer.clear()
 
         while (linuxChannel.read(sizeBuffer) < 8) { }
         sizeBuffer.flip()
         val protobufStrSize = sizeBuffer.getLong
+        println("read number of bytes")
 
         protobufStrBuffer.limit(protobufStrSize.toInt)
         while (linuxChannel.read(protobufStrBuffer) < protobufStrSize) { }
         protobufStrBuffer.flip()
         val protobufStrBytes = new Array[Byte](protobufStrSize.toInt)
         protobufStrBuffer.get(protobufStrBytes)
-        val protobufStr = new String(protobufStrBytes)        
+        val protobufStr = new String(protobufStrBytes)     
+        println("read the string from raft")   
         
         val scroogeReq = ScroogeRequest.parseFrom(protobufStrBytes)
         val maybeCrossChainMessageData = scroogeReq.request match {
           case ScroogeRequest.Request.SendMessageRequest(sendMessageRequest) => 
+            println("found content within raft's pipe")
             Some(sendMessageRequest.content)
           case _ => 
             None
@@ -86,7 +94,7 @@ object Producer {
           case Some(v) =>
             val crossChainMessageData = v.get
             if (crossChainMessageData.sequenceNumber % rsmSize == rsmId) {
-              // println(s"Sending message with content: ${crossChainMessageData.messageContent}")
+              println(s"Sending message with content: ${crossChainMessageData.messageContent}")
               val crossChainMessage = CrossChainMessage (
                 data = Seq(crossChainMessageData)
               )
@@ -117,7 +125,7 @@ object Producer {
           data = Seq(messageData)
         )
         val seralizedMesage = crossChainMessage.toByteArray
-        // println(s"Sending message with content: ${messageData.messageContent}") 
+        println(s"Sending message with content: ${messageData.messageContent}") 
         val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
         producer.send(record)
       }
