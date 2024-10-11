@@ -51,7 +51,7 @@ object Consumer {
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
-    props.put("group.id", nodeId)
+    props.put("group.id", nodeId.toString)
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
     consumer.subscribe(util.Arrays.asList(topic))
 
