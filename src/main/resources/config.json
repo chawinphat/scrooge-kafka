@@ -11,5 +11,7 @@
     "warmup_duration": 3,
     "cooldown_duration": 3,
     "input_path": "/tmp/scrooge-input",
-    "output_path": "/tmp/scrooge-output"
+    "output_path": "/tmp/scrooge-output",
+    "write_dr": false,
+    "write_ccf": false
 }

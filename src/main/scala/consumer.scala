@@ -2,11 +2,13 @@ package main
 
 import scrooge.scrooge_message._
 import scrooge.scrooge_networking._
+import scrooge.scrooge_transfer._
 
 import java.util
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.util.Properties
 import scala.collection.JavaConverters._
+import java.io.{FileOutputStream, File, PrintWriter}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -28,6 +30,11 @@ object Consumer {
 
   val pipeWriter = new PipeWriter
   val outputWriter = new OutputWriter
+  val pipeFile = new File(outputPath)
+  val writer = new PrintWriter(new FileOutputStream(pipeFile))
+
+
+
 
   def main(args: Array[String]): Unit = {
 
@@ -69,10 +76,19 @@ object Consumer {
         println("data found")
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
+
+        if (writeDR) {
+          val transferMessage = ScroogeTransfer().withUnvalidatedCrossChainMessage(crossChainMessage)
+          writer.println(transferMessage.toByteArray)
+        }
+
+        if (writeCCF) {
+
+        }
+
         messageDataList.foreach { messageData =>
           val messageContentBytes = messageData.messageContent.toByteArray()
           val messageContent = new String(messageContentBytes, "UTF-8")
-          println(s"Received Message: $messageContent")
         }
         messagesDeserialized += 1
       }
@@ -102,4 +118,7 @@ object Consumer {
     pipeWriter.writeOutput(jsonString, outputPath) // This one is for Raft
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
   }
+  
+  writer.close()
+
 }
