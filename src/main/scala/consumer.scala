@@ -23,6 +23,8 @@ object Consumer {
   val warmupDuration = configReader.getWarmupDuration()
   val cooldownDuration = configReader.getCooldownDuration()
   val outputPath = configReader.getOutputPath()
+  val writeDR = configReader.getWriteDR()
+  val writeCCF = configReader.getWriteCCF()
 
   val pipeWriter = new PipeWriter
   val outputWriter = new OutputWriter

@@ -67,5 +67,13 @@ class ConfigReader {
   def getOutputPath(): String = {
     configData("output_path").str
   }
+
+  def getWriteDR(): Boolean = {
+    configData("write_dr").bool
+  }
+
+  def getWriteCCF(): Boolean = {
+    configData("write_ccf").bool
+  }
 }
 
