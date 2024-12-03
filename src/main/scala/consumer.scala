@@ -14,6 +14,8 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import java.nio.{ByteBuffer, ByteOrder}
+
 object Consumer {
   val configReader = new ConfigReader
   val rsmId = configReader.getRsmId()
@@ -79,12 +81,31 @@ object Consumer {
 
         if (writeDR) {
           val transferMessage = ScroogeTransfer().withUnvalidatedCrossChainMessage(crossChainMessage)
+          val transferBytes = transferMessage.toByteArray
+          val transferSize = transferBytes.length
+          val buffer = ByteBuffer.allocate(8)
+          buffer.order(ByteOrder.LITTLE_ENDIAN)
+          buffer.putLong(transferSize)
+          
+          writer.println(buffer.array())
           writer.println(transferMessage.toByteArray)
         }
 
         if (writeCCF) {
+          for (msg <- messageDataList) {
+            val recievedKeyValue = KeyValueHash.parseFrom(msg.messageContent.toByteArray())
+            val transferMessage = ScroogeTransfer().withKeyValueHash(recievedKeyValue)
+            val transferBytes = transferMessage.toByteArray
+            val transferSize = transferBytes.length
+            val buffer = ByteBuffer.allocate(8)
+            buffer.order(ByteOrder.LITTLE_ENDIAN)
+            buffer.putLong(transferSize)
 
+            writer.println(buffer.array())
+            writer.println(transferMessage);
+          }
         }
+
 
         messageDataList.foreach { messageData =>
           val messageContentBytes = messageData.messageContent.toByteArray()
