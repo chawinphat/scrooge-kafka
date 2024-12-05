@@ -15,6 +15,8 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import java.nio.{ByteBuffer, ByteOrder}
+import org.apache.kafka.common.TopicPartition
+import org.apache.kafka.common.internals.Topic
 
 object Consumer {
   val configReader = new ConfigReader
@@ -64,7 +66,12 @@ object Consumer {
     props.put("auto.offset.reset", "latest")
     props.put("group.id", nodeId.toString)
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
-    consumer.subscribe(util.Arrays.asList(topic))
+
+    val partitionList = new util.ArrayList[TopicPartition]
+    for (currentIndex <- 0 to rsmSize.ceil.toInt - 1) {
+      partitionList.add(new TopicPartition(topic, currentIndex))
+    }
+    consumer.assign(partitionList)
 
     var messagesDeserialized = 0
     var startTime = System.currentTimeMillis()
