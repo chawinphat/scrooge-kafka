@@ -19,6 +19,7 @@ import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.internals.Topic
 
 object Consumer {
+  println("initializing consumer")
   val configReader = new ConfigReader
   val rsmId = configReader.getRsmId()
   val nodeId = configReader.getNodeId()
@@ -41,9 +42,14 @@ object Consumer {
 
 
   def main(args: Array[String]): Unit = {
-    println("STARTING")
-    println(warmupDuration)
-    println("^^^ warmupduration")
+    println("starting kafka consumer")
+    if (writeDR) {
+      println("Disaster Recovery set to True")
+    }
+
+    if (writeCCF) {
+      println("CCF set to true")
+    }
 
     // Warmup period
     val warmup = warmupDuration.seconds.fromNow
@@ -102,9 +108,11 @@ object Consumer {
           val buffer = ByteBuffer.allocate(8)
           buffer.order(ByteOrder.LITTLE_ENDIAN)
           buffer.putLong(transferSize)
-          
+          println("DR: writting to buffer")
           writer.println(buffer.array())
           writer.println(transferMessage.toByteArray)
+          println("DR: finished writting to buffer")
+
         }
 
         if (writeCCF) {
@@ -117,8 +125,11 @@ object Consumer {
             buffer.order(ByteOrder.LITTLE_ENDIAN)
             buffer.putLong(transferSize)
 
+            println("CCF: writting to buffer")
             writer.println(buffer.array())
             writer.println(transferMessage);
+            println("CCF: finished writting to buffer")
+
           }
         }
 
