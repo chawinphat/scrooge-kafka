@@ -29,11 +29,13 @@ object Producer {
   val inputPath = configReader.getInputPath() // Path to Linux pipe
 
   def main(args: Array[String]): Unit = {
-
+    println("STARTING PRODUCER")
+    println(warmupDuration)
+    println("^^^ warmupduration")
     // Warmup period
     val warmup = warmupDuration.seconds.fromNow
     while (warmup.hasTimeLeft()) { } // Do nothing 
-
+    println("FINISHED WARMUP")
     val produceMessages = Future { // Run on a separate thread
       writeToKafka()
     }

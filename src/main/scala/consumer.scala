@@ -41,6 +41,9 @@ object Consumer {
 
 
   def main(args: Array[String]): Unit = {
+    println("STARTING")
+    println(warmupDuration)
+    println("^^^ warmupduration")
 
     // Warmup period
     val warmup = warmupDuration.seconds.fromNow
