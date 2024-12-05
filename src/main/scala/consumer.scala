@@ -53,9 +53,9 @@ object Consumer {
     }
     Await.result(throughputMeasurement, Duration.Inf) // Wait on new thread to finish
 
-    // Cooldown period
-    val cooldown = cooldownDuration.seconds.fromNow
-    while (cooldown.hasTimeLeft()) { } // Do nothing
+    println("before closing consumer pipe")
+    writer.close()
+    println("after closing consumer pipe")
   }
 
   def consumeFromKafka(timer: Deadline) = {
@@ -143,10 +143,8 @@ object Consumer {
     val jsonString: String = upickle.default.write(outputContent)
 
     println(jsonString)
-    pipeWriter.writeOutput(jsonString, outputPath) // This one is for Raft
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
   }
   
-  writer.close()
 
 }

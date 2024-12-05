@@ -39,9 +39,6 @@ object Producer {
     }
     Await.result(produceMessages, Duration.Inf) // Wait on new thread to finish
 
-    // Cooldown period
-    val cooldown = cooldownDuration.seconds.fromNow
-    while (cooldown.hasTimeLeft()) { } // Do nothing
   }
 
   def writeToKafka(): Unit = {
@@ -109,7 +106,11 @@ object Producer {
         }
       }
 
+      println("before closing producer pipe")
       linuxPipe.close()
+      linuxChannel.close()
+      println("after closing producer pipe")
+
     } else { // Send message from config
       val timer = benchmarkDuration.seconds.fromNow
 
@@ -130,7 +131,6 @@ object Producer {
         producer.send(record)
       }
     }
-    
     producer.close()
   }
 }
