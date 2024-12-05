@@ -117,6 +117,7 @@ object Consumer {
           buffer.order(ByteOrder.LITTLE_ENDIAN)
           buffer.putLong(transferSize)
           println("DR: writting to buffer")
+          println("transfer size:" + transferSize.toString())
           writer.println(buffer.array())
           writer.println(transferMessage.toByteArray)
           println("DR: finished writting to buffer")
