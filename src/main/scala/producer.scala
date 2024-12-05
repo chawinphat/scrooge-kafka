@@ -29,6 +29,10 @@ object Producer {
   val inputPath = configReader.getInputPath() // Path to Linux pipe
 
   def main(args: Array[String]): Unit = {
+    if (topic == "") {
+      return;
+    }
+
     println("STARTING PRODUCER")
     println(warmupDuration)
     println("^^^ warmupduration")

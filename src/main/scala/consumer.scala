@@ -42,6 +42,10 @@ object Consumer {
 
 
   def main(args: Array[String]): Unit = {
+    if (topic == "") {
+      return;
+    }
+
     println("starting kafka consumer")
     if (writeDR) {
       println("Disaster Recovery set to True")
