@@ -100,7 +100,7 @@ object Producer {
               )
               val seralizedMesage = crossChainMessage.toByteArray
 
-              val record = new ProducerRecord[String, Array[Byte]](topic, seralizedMesage)
+              val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
               producer.send(record)
             }
             
