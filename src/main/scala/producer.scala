@@ -62,6 +62,10 @@ object Producer {
       val protobufStrBuffer = ByteBuffer.allocate(8388608).order(ByteOrder.LITTLE_ENDIAN)
       
       val timer = benchmarkDuration.seconds.fromNow
+      
+      var messagesSerialized = 0
+      var startTime = System.currentTimeMillis()
+
       println("starting timer")
       while (timer.hasTimeLeft()) {
 
@@ -109,12 +113,17 @@ object Producer {
 
               val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
               producer.send(record)
+              messagesSerialized += 1
             }
             
           case None =>
             println("CrossChainMessageData not found")
         }
       }
+
+      val finalTime = System.currentTimeMillis()
+      val overallThroughput = messagesSerialized.toDouble / ((finalTime - startTime).toDouble/1000)
+      println("Overall Throughput: " + overallThroughput)
 
       println("before closing producer pipe")
       linuxPipe.close()
@@ -123,7 +132,11 @@ object Producer {
 
     } else { // Send message from config
       val timer = benchmarkDuration.seconds.fromNow
-
+      
+      var messagesSerialized = 0
+      var startTime = System.currentTimeMillis()
+    
+      println("starting timer")
       while (timer.hasTimeLeft()) {
         val messageStr = configReader.getMessage()
         val messageStrBytes = messageStr.getBytes("UTF-8")
@@ -139,8 +152,14 @@ object Producer {
         println(s"Sending message with content: ${messageData.messageContent}") 
         val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
         producer.send(record)
+        messagesSerialized += 1
       }
+
+      val finalTime = System.currentTimeMillis()
+      val overallThroughput = messagesSerialized.toDouble / ((finalTime - startTime).toDouble/1000)
+      println("Overall Throughput: " + overallThroughput)
     }
+
     producer.close()
   }
 }
