@@ -118,7 +118,11 @@ object Consumer {
           buffer.putLong(transferSize)
           println("DR: writting to buffer")
           println("transfer size:" + transferSize.toString())
-          println("buffer to string:" + buffer.array().map(_.toInt).mkString)
+          println("buffer to string:" + buffer.array().map("%02X" format _).mkString)
+          
+          buffer.array().foreach { byte =>
+            println(byte & 0xFF) // Convert to unsigned integer representation
+          }
 
           // writer.println(buffer.array())
           // writer.println(transferMessage.toByteArray)
