@@ -48,6 +48,7 @@ object Consumer {
 
     // Run a new thread to measure throughput -> an optimization since polling may take a bit of time
     val benchmark = benchmarkDuration.seconds.fromNow
+    println("about to consume from Kafka")
     val throughputMeasurement = Future {
       consumeFromKafka(benchmark)
     }
@@ -67,11 +68,16 @@ object Consumer {
     props.put("group.id", nodeId.toString)
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
 
+    println("finished creating consumer")
+
     val partitionList = new util.ArrayList[TopicPartition]
     for (currentIndex <- 0 to rsmSize.ceil.toInt - 1) {
       partitionList.add(new TopicPartition(topic, currentIndex))
     }
     consumer.assign(partitionList)
+
+    println("finished assigning partition list")
+
 
     var messagesDeserialized = 0
     var startTime = System.currentTimeMillis()
