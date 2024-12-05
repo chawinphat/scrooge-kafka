@@ -59,7 +59,7 @@ object Producer {
       val linuxChannel = linuxPipe.getChannel
 
       val sizeBuffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
-      val protobufStrBuffer = ByteBuffer.allocate(4096).order(ByteOrder.LITTLE_ENDIAN)
+      val protobufStrBuffer = ByteBuffer.allocate(8388608).order(ByteOrder.LITTLE_ENDIAN)
       
       val timer = benchmarkDuration.seconds.fromNow
       println("starting timer")
@@ -67,14 +67,21 @@ object Producer {
 
         sizeBuffer.clear()
         protobufStrBuffer.clear()
+        var sizeBufferBytesRead = 0
+        while (sizeBufferBytesRead < 8) { 
+          sizeBufferBytesRead += linuxChannel.read(sizeBuffer)
+        }
 
-        while (linuxChannel.read(sizeBuffer) < 8) { }
         sizeBuffer.flip()
         val protobufStrSize = sizeBuffer.getLong
         println("read number of bytes")
 
         protobufStrBuffer.limit(protobufStrSize.toInt)
-        while (linuxChannel.read(protobufStrBuffer) < protobufStrSize) { }
+        var protobufStrBufferBytesRead = 0
+        while (protobufStrBufferBytesRead < protobufStrSize) {
+          protobufStrBufferBytesRead += linuxChannel.read(protobufStrBuffer)
+         }
+
         protobufStrBuffer.flip()
         val protobufStrBytes = new Array[Byte](protobufStrSize.toInt)
         protobufStrBuffer.get(protobufStrBytes)
