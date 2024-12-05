@@ -118,7 +118,21 @@ object Consumer {
           buffer.putLong(transferSize)
           println("DR: writting to buffer")
           println("transfer size:" + transferSize.toString())
-          println("buffer to string:" + buffer.toString())
+          println("buffer to string:" + buffer.getInt().toString())
+          println("buffer to string:" + buffer.getInt().toString())
+
+          println("buffer to string:" + buffer.getInt().toString())
+
+          println("buffer to string:" + buffer.getInt().toString())
+
+          println("buffer to string:" + buffer.getInt().toString())
+
+          println("buffer to string:" + buffer.getInt().toString())
+
+          println("buffer to string:" + buffer.getInt().toString())
+
+          println("buffer to string:" + buffer.getInt().toString())
+
           // writer.println(buffer.array())
           // writer.println(transferMessage.toByteArray)
           println("DR: finished writting to buffer")
