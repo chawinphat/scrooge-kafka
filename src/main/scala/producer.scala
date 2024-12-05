@@ -29,7 +29,6 @@ object Producer {
   val inputPath = configReader.getInputPath() // Path to Linux pipe
 
   def main(args: Array[String]): Unit = {
-<<<<<<< HEAD
     if (topic == "") {
       return;
     }
@@ -37,8 +36,6 @@ object Producer {
     println("STARTING PRODUCER")
     println(warmupDuration)
     println("^^^ warmupduration")
-=======
->>>>>>> d570fa0 (no print lines)
     // Warmup period
     val warmup = warmupDuration.seconds.fromNow
     while (warmup.hasTimeLeft()) { } // Do nothing 
@@ -131,12 +128,18 @@ object Producer {
       }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> bc41b35 (Added log to see producer throughput)
       val finalTime = System.currentTimeMillis()
       val overallThroughput = messagesSerialized.toDouble / ((finalTime - startTime).toDouble/1000)
       println("Overall Throughput: " + overallThroughput)
 
+<<<<<<< HEAD
       println("before closing producer pipe")
 =======
+=======
+>>>>>>> bc41b35 (Added log to see producer throughput)
       // println("before closing producer pipe")
 >>>>>>> d570fa0 (no print lines)
       linuxPipe.close()
@@ -171,9 +174,12 @@ object Producer {
       val finalTime = System.currentTimeMillis()
       val overallThroughput = messagesSerialized.toDouble / ((finalTime - startTime).toDouble/1000)
       println("Overall Throughput: " + overallThroughput)
+<<<<<<< HEAD
       
       println("Producer Metrics: ")
       producer.metrics().entrySet().forEach(x => println("key=" + x.getKey().name() + ",value=" + x.getValue().metricValue().toString()))
+=======
+>>>>>>> bc41b35 (Added log to see producer throughput)
     }
 
     producer.close()
