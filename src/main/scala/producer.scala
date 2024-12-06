@@ -127,21 +127,11 @@ object Producer {
         }
       }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> bc41b35 (Added log to see producer throughput)
       val finalTime = System.currentTimeMillis()
       val overallThroughput = messagesSerialized.toDouble / ((finalTime - startTime).toDouble/1000)
       println("Overall Throughput: " + overallThroughput)
 
-<<<<<<< HEAD
-      println("before closing producer pipe")
-=======
-=======
->>>>>>> bc41b35 (Added log to see producer throughput)
       // println("before closing producer pipe")
->>>>>>> d570fa0 (no print lines)
       linuxPipe.close()
       linuxChannel.close()
       // println("after closing producer pipe")
@@ -174,12 +164,9 @@ object Producer {
       val finalTime = System.currentTimeMillis()
       val overallThroughput = messagesSerialized.toDouble / ((finalTime - startTime).toDouble/1000)
       println("Overall Throughput: " + overallThroughput)
-<<<<<<< HEAD
       
       println("Producer Metrics: ")
       producer.metrics().entrySet().forEach(x => println("key=" + x.getKey().name() + ",value=" + x.getValue().metricValue().toString()))
-=======
->>>>>>> bc41b35 (Added log to see producer throughput)
     }
 
     producer.close()
