@@ -17,6 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.nio.{ByteBuffer, ByteOrder}
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.internals.Topic
+import org.apache.kafka.common.MetricName
 
 object Consumer {
   println("initializing consumer")
@@ -171,8 +172,11 @@ object Consumer {
 
     println(jsonString)
 
-    println("Consumer Metrics: " + consumer.metrics())
+    println("Consumer Metrics: ")
 
+    consumer.metrics().entrySet().forEach(x => println("key=" + x.getKey().name() + ",value=" + x.getValue().metricValue().toString()))
+    
+    println("Producer Metrics: ")
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
   }
   
