@@ -122,6 +122,9 @@ object Consumer {
             buffer.order(ByteOrder.LITTLE_ENDIAN)
             buffer.putLong(transferSize)
 
+            println("Key Value" + recievedKeyValue)
+
+
             writer.write(buffer.array())
             writer.write(transferMessage.toByteArray)
 
