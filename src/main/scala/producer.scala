@@ -29,13 +29,9 @@ object Producer {
   val inputPath = configReader.getInputPath() // Path to Linux pipe
 
   def main(args: Array[String]): Unit = {
-    println("STARTING PRODUCER")
-    println(warmupDuration)
-    println("^^^ warmupduration")
     // Warmup period
     val warmup = warmupDuration.seconds.fromNow
     while (warmup.hasTimeLeft()) { } // Do nothing 
-    println("FINISHED WARMUP")
     val produceMessages = Future { // Run on a separate thread
       writeToKafka()
     }
@@ -54,7 +50,7 @@ object Producer {
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
       val linuxPipe = new RandomAccessFile(inputPath, "r")
       if (linuxPipe != null) {
-        println("Pipe exists!")
+        // println("Pipe exists!")
       }
       val linuxChannel = linuxPipe.getChannel
 
@@ -74,7 +70,7 @@ object Producer {
 
         sizeBuffer.flip()
         val protobufStrSize = sizeBuffer.getLong
-        println("read number of bytes")
+        // println("read number of bytes")
 
         protobufStrBuffer.limit(protobufStrSize.toInt)
         var protobufStrBufferBytesRead = 0
@@ -86,12 +82,12 @@ object Producer {
         val protobufStrBytes = new Array[Byte](protobufStrSize.toInt)
         protobufStrBuffer.get(protobufStrBytes)
         val protobufStr = new String(protobufStrBytes)     
-        println("read the string from raft")   
+        // println("read the string from raft")   
         
         val scroogeReq = ScroogeRequest.parseFrom(protobufStrBytes)
         val maybeCrossChainMessageData = scroogeReq.request match {
           case ScroogeRequest.Request.SendMessageRequest(sendMessageRequest) => 
-            println("found content within raft's pipe")
+            // println("found content within raft's pipe")
             Some(sendMessageRequest.content)
           case _ => 
             None
@@ -116,10 +112,10 @@ object Producer {
         }
       }
 
-      println("before closing producer pipe")
+      // println("before closing producer pipe")
       linuxPipe.close()
       linuxChannel.close()
-      println("after closing producer pipe")
+      // println("after closing producer pipe")
 
     } else { // Send message from config
       val timer = benchmarkDuration.seconds.fromNow
