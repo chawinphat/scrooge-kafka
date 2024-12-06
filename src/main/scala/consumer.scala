@@ -19,6 +19,7 @@ import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.internals.Topic
 import org.apache.kafka.common.MetricName
 import java.io.BufferedOutputStream
+import org.apache.kafka.common.MetricName
 
 object Consumer {
   // println("initializing consumer")
