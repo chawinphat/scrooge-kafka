@@ -172,10 +172,8 @@ object Consumer {
     println(jsonString)
 
     println("Consumer Metrics: ")
-
     consumer.metrics().entrySet().forEach(x => println("key=" + x.getKey().name() + ",value=" + x.getValue().metricValue().toString()))
     
-    println("Producer Metrics: ")
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
   }
   
