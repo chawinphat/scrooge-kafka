@@ -80,6 +80,7 @@ object Consumer {
     props.put("auto.offset.reset", "latest")
     props.put("group.id", nodeId.toString)
     props.put("fetch.min.bytes", 100000)
+    props.put("fetch.max.wait.ms", 5)
     props.put("max.poll.records", 10000)
 
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
