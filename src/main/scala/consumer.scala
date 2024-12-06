@@ -17,6 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.nio.{ByteBuffer, ByteOrder}
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.internals.Topic
+import java.io.BufferedOutputStream
 
 object Consumer {
   println("initializing consumer")
@@ -36,7 +37,7 @@ object Consumer {
   val pipeWriter = new PipeWriter
   val outputWriter = new OutputWriter
   val pipeFile = new File(outputPath)
-  val writer = new PrintWriter(new FileOutputStream(pipeFile))
+  val writer = new BufferedOutputStream(new FileOutputStream(pipeFile))
 
 
 
@@ -111,13 +112,13 @@ object Consumer {
           println("DR: writting to buffer")
           println("transfer size:" + transferSize.toString())
           println("buffer to string:" + buffer.array().map("%02X" format _).mkString)
-          
+
           buffer.array().foreach { byte =>
             println(byte & 0xFF) // Convert to unsigned integer representation
           }
 
-          // writer.println(buffer.array())
-          // writer.println(transferMessage.toByteArray)
+          writer.write(buffer.array())
+          writer.write(transferMessage.toByteArray)
           println("DR: finished writting to buffer")
 
         }
@@ -133,8 +134,8 @@ object Consumer {
             buffer.putLong(transferSize)
 
             println("CCF: writting to buffer")
-            writer.println(buffer.array())
-            writer.println(transferMessage);
+            writer.write(buffer.array())
+            writer.write(transferMessage.toByteArray)
             println("CCF: finished writting to buffer")
 
           }
