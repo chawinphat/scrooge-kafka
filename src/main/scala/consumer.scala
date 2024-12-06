@@ -130,7 +130,7 @@ object Consumer {
             val buffer = ByteBuffer.allocate(8)
             buffer.order(ByteOrder.LITTLE_ENDIAN)
             buffer.putLong(transferSize)
-
+            println("creating key")
             println("Key Value" + recievedKeyValue)
 
 
