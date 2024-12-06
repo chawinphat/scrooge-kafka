@@ -96,7 +96,7 @@ object Producer {
         maybeCrossChainMessageData match {
           case Some(v) =>
             val crossChainMessageData = v.get
-            if (crossChainMessageData.sequenceNumber % rsmSize == rsmId) {
+            if (crossChainMessageData.sequenceNumber % rsmSize == nodeId) {
               println(s"Sending message with content: ${crossChainMessageData.messageContent}")
               val crossChainMessage = CrossChainMessage (
                 data = Seq(crossChainMessageData)
