@@ -165,6 +165,8 @@ object Producer {
       val finalTime = System.currentTimeMillis()
       val overallThroughput = messagesSerialized.toDouble / ((finalTime - startTime).toDouble/1000)
       println("Overall Throughput: " + overallThroughput)
+
+      println("Producer Metrics: " + producer.metrics())
     }
 
     producer.close()

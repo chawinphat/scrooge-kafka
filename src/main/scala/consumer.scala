@@ -84,7 +84,6 @@ object Consumer {
     props.put("max.poll.records", 10000)
 
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
-
     println("finished creating consumer")
 
     val partitionList = new util.ArrayList[TopicPartition]
@@ -171,6 +170,9 @@ object Consumer {
     val jsonString: String = upickle.default.write(outputContent)
 
     println(jsonString)
+
+    println("Consumer Metrics: " + consumer.metrics())
+
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
   }
   
