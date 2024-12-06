@@ -21,7 +21,7 @@ import org.apache.kafka.common.MetricName
 import java.io.BufferedOutputStream
 
 object Consumer {
-  println("initializing consumer")
+  // println("initializing consumer")
   val configReader = new ConfigReader
   val rsmId = configReader.getRsmId()
   val nodeId = configReader.getNodeId()
@@ -53,9 +53,9 @@ object Consumer {
       println("Disaster Recovery set to True")
     }
 
-    if (writeCCF) {
-      println("CCF set to true")
-    }
+    // if (writeCCF) {
+    //   println("CCF set to true")
+    // }
 
     // Warmup period
     val warmup = warmupDuration.seconds.fromNow
@@ -63,15 +63,12 @@ object Consumer {
 
     // Run a new thread to measure throughput -> an optimization since polling may take a bit of time
     val benchmark = benchmarkDuration.seconds.fromNow
-    println("about to consume from Kafka")
     val throughputMeasurement = Future {
       consumeFromKafka(benchmark)
     }
     Await.result(throughputMeasurement, Duration.Inf) // Wait on new thread to finish
 
-    println("before closing consumer pipe")
     writer.close()
-    println("after closing consumer pipe")
   }
 
   def consumeFromKafka(timer: Deadline) = {
@@ -94,19 +91,16 @@ object Consumer {
     }
     consumer.assign(partitionList)
 
-    println("finished assigning partition list")
-
-
     var messagesDeserialized = 0
     var startTime = System.currentTimeMillis()
 
     var outputContent: Map[String, Double] = Map("Start_Time_MS" -> startTime.toDouble) 
-    println("starting timer")
+    // println("starting timer")
     while (timer.hasTimeLeft()) {
       val record = consumer.poll(1000).asScala
-      println("polling for data")
+      // println("polling for data")
       for (data <- record.iterator) {
-        println("data found")
+        // println("data found")
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
 
@@ -117,9 +111,6 @@ object Consumer {
           val buffer = ByteBuffer.allocate(8)
           buffer.order(ByteOrder.LITTLE_ENDIAN)
           buffer.putLong(transferSize)
-          println("DR: writting to buffer")
-          println("transfer size:" + transferSize.toString())
-          println("buffer to string:" + buffer.array().map("%02X" format _).mkString)
 
           buffer.array().foreach { byte =>
             println(byte & 0xFF) // Convert to unsigned integer representation
@@ -127,7 +118,6 @@ object Consumer {
 
           writer.write(buffer.array())
           writer.write(transferMessage.toByteArray)
-          println("DR: finished writting to buffer")
 
         }
 
@@ -141,10 +131,8 @@ object Consumer {
             buffer.order(ByteOrder.LITTLE_ENDIAN)
             buffer.putLong(transferSize)
 
-            println("CCF: writting to buffer")
             writer.write(buffer.array())
             writer.write(transferMessage.toByteArray)
-            println("CCF: finished writting to buffer")
 
           }
         }
