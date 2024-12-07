@@ -94,7 +94,7 @@ object Consumer {
     var outputContent: Map[String, Double] = Map("Start_Time_MS" -> startTime.toDouble) 
     // println("starting timer")
     while (testTimer.hasTimeLeft()) {
-      val record = consumer.poll(1000).asScala
+      val record = consumer.poll(1).asScala
       // println("polling for data")
       for (data <- record.iterator) {
         // println("received data from topic: " + data.topic() + ", partition: " + data.partition().toString())
