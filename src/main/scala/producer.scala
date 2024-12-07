@@ -49,7 +49,7 @@ object Producer {
     props.put("acks", "all")
     // props.put("linger.ms", 5)
     // props.put("batch.size", 100000)
-    // props.put("buffer.memory", 1000000000)
+    //props.put("buffer.memory", 1000000000)
 
     val producer = new KafkaProducer[String, Array[Byte]](props)
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
