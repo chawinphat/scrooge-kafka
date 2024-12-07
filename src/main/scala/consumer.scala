@@ -24,7 +24,7 @@ object Consumer {
   val configReader = new ConfigReader
   val rsmId = configReader.getRsmId()
   val nodeId = configReader.getNodeId()
-  val topic = if (rsmId == 1) configReader.getTopic1() else configReader.getTopic2()
+  val topic = if (rsmId == 1) configReader.getTopic2() else configReader.getTopic1()
   val brokerIps = configReader.getBrokerIps()
   val rsmSize = configReader.getRsmSize()
   val benchmarkDuration = configReader.getBenchmarkDuration()
