@@ -46,9 +46,9 @@ object Producer {
     props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
-    props.put("acks", "1")
-    props.put("linger.ms", 10)
-    props.put("batch.size", 100000)
+    // props.put("acks", "1")
+    // props.put("linger.ms", 10)
+    // props.put("batch.size", 100000)
     //props.put("buffer.memory", 1000000000)
 
     val producer = new KafkaProducer[String, Array[Byte]](props)
@@ -107,7 +107,7 @@ object Producer {
           case Some(v) =>
             val crossChainMessageData = v.get
             if (crossChainMessageData.sequenceNumber % rsmSize == nodeId) {
-              println(s"Sending message with content: ${crossChainMessageData.messageContent}")
+              // println(s"Sending message with content: ${crossChainMessageData.messageContent}")
               val crossChainMessage = CrossChainMessage (
                 data = Seq(crossChainMessageData)
               )

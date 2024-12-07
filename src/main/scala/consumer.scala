@@ -97,7 +97,7 @@ object Consumer {
       val record = consumer.poll(1000).asScala
       // println("polling for data")
       for (data <- record.iterator) {
-        println("received data from topic: " + data.topic() + ", partition: " + data.partition().toString())
+        // println("received data from topic: " + data.topic() + ", partition: " + data.partition().toString())
         // println("data found")
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
