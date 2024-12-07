@@ -29,9 +29,11 @@ object Producer {
   val inputPath = configReader.getInputPath() // Path to Linux pipe
 
   def main(args: Array[String]): Unit = {
-    // Warmup period
-    val warmup = warmupDuration.seconds.fromNow
-    while (warmup.hasTimeLeft()) { } // Do nothing 
+    if (topic == "") {
+      return;
+    }
+
+    println("STARTING PRODUCER")
     val produceMessages = Future { // Run on a separate thread
       writeToKafka()
     }
@@ -57,9 +59,14 @@ object Producer {
       val sizeBuffer = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN)
       val protobufStrBuffer = ByteBuffer.allocate(8388608).order(ByteOrder.LITTLE_ENDIAN)
       
-      val timer = benchmarkDuration.seconds.fromNow
+      val warmupTimer = warmupDuration.seconds.fromNow
+      val testTimer = (benchmarkDuration+warmupDuration).seconds.fromNow
+      
+      var messagesSerialized = 0
+      var startTime = System.currentTimeMillis()
+
       println("starting timer")
-      while (timer.hasTimeLeft()) {
+      while (testTimer.hasTimeLeft()) {
 
         sizeBuffer.clear()
         protobufStrBuffer.clear()
@@ -105,6 +112,10 @@ object Producer {
 
               val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
               producer.send(record)
+
+              if (!warmupTimer.hasTimeLeft()) {
+                messagesSerialized += 1
+              }
             }
             
           case None =>
@@ -118,9 +129,14 @@ object Producer {
       // println("after closing producer pipe")
 
     } else { // Send message from config
-      val timer = benchmarkDuration.seconds.fromNow
-
-      while (timer.hasTimeLeft()) {
+      val warmupTimer = warmupDuration.seconds.fromNow
+      val testTimer = (benchmarkDuration+warmupDuration).seconds.fromNow
+      
+      var messagesSerialized = 0
+      var startTime = System.currentTimeMillis()
+    
+      println("starting timer")
+      while (testTimer.hasTimeLeft()) {
         val messageStr = configReader.getMessage()
         val messageStrBytes = messageStr.getBytes("UTF-8")
         val messageData = CrossChainMessageData (
@@ -135,6 +151,10 @@ object Producer {
         println(s"Sending message with content: ${messageData.messageContent}") 
         val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
         producer.send(record)
+
+        if (!warmupTimer.hasTimeLeft()) {
+          messagesSerialized += 1
+        }
       }
     }
     producer.close()
