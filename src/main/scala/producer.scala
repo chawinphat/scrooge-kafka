@@ -27,7 +27,7 @@ object Producer {
   val warmupDuration = configReader.getWarmupDuration()
   val cooldownDuration = configReader.getCooldownDuration()
   val inputPath = configReader.getInputPath() // Path to Linux pipe
-
+  println(s"Producer topic: ${topic}")
 
   def main(args: Array[String]): Unit = {
     if (topic == "") {
@@ -38,7 +38,7 @@ object Producer {
       println("this machine has failed :(")
       return
     }
-
+    println("starting kafka producer")
     val produceMessages = Future { // Run on a separate thread
       writeToKafka()
     }
@@ -134,10 +134,6 @@ object Producer {
       // println("after closing producer pipe")
 
     } else { // Send message from config
-      if ((nodeId % 3) == 2) {
-        println("this machine has failed :(")
-        return
-      }
       val warmupTimer = warmupDuration.seconds.fromNow
       val testTimer = (benchmarkDuration+warmupDuration).seconds.fromNow
       

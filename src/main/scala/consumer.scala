@@ -55,6 +55,7 @@ object Consumer {
     }
 
     // Run a new thread to measure throughput -> an optimization since polling may take a bit of time
+    println("starting kafka consumer")
     val throughputMeasurement = Future {
       consumeFromKafka()
     }
