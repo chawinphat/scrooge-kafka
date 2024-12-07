@@ -41,9 +41,6 @@ object Consumer {
   val pipeFile = new File(outputPath)
   val writer = new BufferedOutputStream(new FileOutputStream(pipeFile))
 
-
-
-
   def main(args: Array[String]): Unit = {
     if (topic == "") {
       return;
@@ -58,21 +55,16 @@ object Consumer {
     //   println("CCF set to true")
     // }
 
-    // Warmup period
-    val warmup = warmupDuration.seconds.fromNow
-    while (warmup.hasTimeLeft()) { } // Do nothing
-
     // Run a new thread to measure throughput -> an optimization since polling may take a bit of time
-    val benchmark = benchmarkDuration.seconds.fromNow
     val throughputMeasurement = Future {
-      consumeFromKafka(benchmark)
+      consumeFromKafka()
     }
     Await.result(throughputMeasurement, Duration.Inf) // Wait on new thread to finish
 
     writer.close()
   }
 
-  def consumeFromKafka(timer: Deadline) = {
+  def consumeFromKafka() = {
     val props = new Properties()
     props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
@@ -92,12 +84,15 @@ object Consumer {
     }
     consumer.assign(partitionList)
 
+    val warmupTimer = warmupDuration.seconds.fromNow
+    val testTimer = (benchmarkDuration+warmupDuration).seconds.fromNow
+
     var messagesDeserialized = 0
     var startTime = System.currentTimeMillis()
 
     var outputContent: Map[String, Double] = Map("Start_Time_MS" -> startTime.toDouble) 
     // println("starting timer")
-    while (timer.hasTimeLeft()) {
+    while (testTimer.hasTimeLeft()) {
       val record = consumer.poll(1000).asScala
       // println("polling for data")
       for (data <- record.iterator) {
@@ -119,7 +114,6 @@ object Consumer {
 
           writer.write(buffer.array())
           writer.write(transferMessage.toByteArray)
-
         }
 
         if (writeCCF) {
@@ -134,10 +128,8 @@ object Consumer {
             println("creating key")
             println("Key Value" + recievedKeyValue)
 
-
             writer.write(buffer.array())
             writer.write(transferMessage.toByteArray)
-
           }
         }
 
@@ -146,7 +138,10 @@ object Consumer {
           val messageContentBytes = messageData.messageContent.toByteArray()
           val messageContent = new String(messageContentBytes, "UTF-8")
         }
-        messagesDeserialized += 1
+
+        if (!warmupTimer.hasTimeLeft()) {
+          messagesDeserialized += 1
+        }
       }
     }   
     consumer.close()
