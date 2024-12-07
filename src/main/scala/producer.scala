@@ -28,7 +28,6 @@ object Producer {
   val cooldownDuration = configReader.getCooldownDuration()
   val inputPath = configReader.getInputPath() // Path to Linux pipe
 
-  println(s"producing to topic ${topic}")
 
   def main(args: Array[String]): Unit = {
     if (topic == "") {
@@ -37,7 +36,6 @@ object Producer {
 
     if ((nodeId % 3) == 2) {
       println("this machine has failed :(")
-      //this node fails
       return
     }
 
@@ -72,7 +70,6 @@ object Producer {
       var messagesSerialized = 0
       var startTime = System.currentTimeMillis()
 
-      println("starting timer")
       while (testTimer.hasTimeLeft()) {
 
         sizeBuffer.clear()
@@ -139,7 +136,6 @@ object Producer {
     } else { // Send message from config
       if ((nodeId % 3) == 2) {
         println("this machine has failed :(")
-        //this node fails
         return
       }
       val warmupTimer = warmupDuration.seconds.fromNow

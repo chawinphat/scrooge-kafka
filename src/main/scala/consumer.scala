@@ -21,7 +21,6 @@ import java.io.BufferedOutputStream
 
 object Consumer {
   // println("initializing consumer")
-  println("getting config")
   val configReader = new ConfigReader
   val rsmId = configReader.getRsmId()
   val nodeId = configReader.getNodeId()
@@ -34,7 +33,6 @@ object Consumer {
   val outputPath = configReader.getOutputPath()
   val writeDR = configReader.getWriteDR()
   val writeCCF = configReader.getWriteCCF()
-  println("creating pipe writer")
 
   val pipeWriter = new PipeWriter
   val outputWriter = new OutputWriter
@@ -51,17 +49,12 @@ object Consumer {
     //   println("CCF set to true")
     // }
 
-    println("starting main")
-    print(s"{nodeId}")
     if (nodeId % 3 == 2) {
       println("this machine has failed :(")
-      //node fails
-      //do we need to create a temp file so makeNetwork does not fail?
       return;
     }
 
     // Run a new thread to measure throughput -> an optimization since polling may take a bit of time
-    println("starting to consume from kafka")
     val throughputMeasurement = Future {
       consumeFromKafka()
     }
@@ -79,10 +72,8 @@ object Consumer {
     props.put("group.id", nodeId.toString)
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
 
-    print("starting partitioining")
     val partitionList = new util.ArrayList[TopicPartition]
     for (currentIndex <- 0 to rsmSize.ceil.toInt - 1) {
-      println(s"${currentIndex} is on ${topic}")
       partitionList.add(new TopicPartition(topic, currentIndex))
     }
     consumer.assign(partitionList)
@@ -97,9 +88,7 @@ object Consumer {
     // println("starting timer")
     while (testTimer.hasTimeLeft()) {
       val record = consumer.poll(1000).asScala
-      println("polling for data")
       for (data <- record.iterator) {
-        println("data found")
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
 
