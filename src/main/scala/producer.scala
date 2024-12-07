@@ -28,9 +28,17 @@ object Producer {
   val cooldownDuration = configReader.getCooldownDuration()
   val inputPath = configReader.getInputPath() // Path to Linux pipe
 
+  println(s"producing to topic ${topic}")
+
   def main(args: Array[String]): Unit = {
     if (topic == "") {
       return;
+    }
+
+    if ((nodeId % 3) == 2) {
+      println("this machine has failed :(")
+      //this node fails
+      return
     }
 
     val produceMessages = Future { // Run on a separate thread
@@ -102,7 +110,9 @@ object Producer {
         maybeCrossChainMessageData match {
           case Some(v) =>
             val crossChainMessageData = v.get
-            if (crossChainMessageData.sequenceNumber % rsmSize == nodeId) {
+            val idOfWorking = nodeId - Math.floorDiv(nodeId.toInt, 3)
+            val numWorking = rsmSize - Math.floorDiv(rsmSize.toInt, 3)
+            if (idOfWorking == crossChainMessageData.sequenceNumber % numWorking) {
               val crossChainMessage = CrossChainMessage (
                 data = Seq(crossChainMessageData)
               )
@@ -127,6 +137,11 @@ object Producer {
       // println("after closing producer pipe")
 
     } else { // Send message from config
+      if ((nodeId % 3) == 2) {
+        println("this machine has failed :(")
+        //this node fails
+        return
+      }
       val warmupTimer = warmupDuration.seconds.fromNow
       val testTimer = (benchmarkDuration+warmupDuration).seconds.fromNow
       
