@@ -75,6 +75,7 @@ object Consumer {
 
     val partitionList = new util.ArrayList[TopicPartition]
     for (currentIndex <- 0 to rsmSize.ceil.toInt - 1) {
+      println(s"consuming from topic: ${topic} with partition: ${currentIndex}")
       partitionList.add(new TopicPartition(topic, currentIndex))
     }
     consumer.assign(partitionList)
