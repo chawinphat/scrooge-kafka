@@ -98,10 +98,6 @@ object Consumer {
           buffer.order(ByteOrder.LITTLE_ENDIAN)
           buffer.putLong(transferSize)
 
-          buffer.array().foreach { byte =>
-            println(byte & 0xFF) // Convert to unsigned integer representation
-          }
-
           writer.write(buffer.array())
           writer.write(transferMessage.toByteArray)
         }
@@ -115,8 +111,6 @@ object Consumer {
             val buffer = ByteBuffer.allocate(8)
             buffer.order(ByteOrder.LITTLE_ENDIAN)
             buffer.putLong(transferSize)
-            println("creating key")
-            println("Key Value" + recievedKeyValue)
 
             writer.write(buffer.array())
             writer.write(transferMessage.toByteArray)
