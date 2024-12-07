@@ -144,7 +144,6 @@ object Consumer {
         }
       }
     }   
-    consumer.close()
 
     /* Example output:
       { 
@@ -164,13 +163,14 @@ object Consumer {
     outputContent += ("Overall_Throughput_MPS" -> overallThroughput.toDouble)
 
     val jsonString: String = upickle.default.write(outputContent)
-
     println(jsonString)
 
     println("Consumer Metrics: ")
     consumer.metrics().entrySet().forEach(x => println("key=" + x.getKey().name() + ",value=" + x.getValue().metricValue().toString()))
     
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
+
+    consumer.close()
   }
   
 
