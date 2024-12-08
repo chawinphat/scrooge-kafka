@@ -46,7 +46,7 @@ object Producer {
     props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
-    props.put("acks", "all")
+    // props.put("acks", "all")
     // props.put("linger.ms", 10)
     // props.put("batch.size", 200000)
     // props.put("buffer.memory", 1000000000)
@@ -155,7 +155,7 @@ object Producer {
           data = Seq(messageData)
         )
         val seralizedMesage = crossChainMessage.toByteArray
-        println(s"Sending message with content: ${messageData.messageContent}") 
+        // println(s"Sending message with content: ${messageData.messageContent}") 
         val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
         producer.send(record)
 
@@ -168,8 +168,8 @@ object Producer {
       val overallThroughput = messagesSerialized.toDouble / ((finalTime - startTime).toDouble/1000)
       println("Overall Throughput: " + overallThroughput)
       
-      println("Producer Metrics: ")
-      producer.metrics().entrySet().forEach(x => println("key=" + x.getKey().name() + ",value=" + x.getValue().metricValue().toString()))
+      // println("Producer Metrics: ")
+      // producer.metrics().entrySet().forEach(x => println("key=" + x.getKey().name() + ",value=" + x.getValue().metricValue().toString()))
     }
 
     producer.close()

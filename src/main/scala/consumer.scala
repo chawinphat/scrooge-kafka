@@ -72,8 +72,6 @@ object Consumer {
     props.put("auto.offset.reset", "latest")
     props.put("group.id", nodeId.toString)
     // props.put("fetch.min.bytes", 100000)
-    // props.put("fetch.max.wait.ms", 5)
-    // props.put("max.poll.records", 10000)
 
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
     println("finished creating consumer")
@@ -167,8 +165,8 @@ object Consumer {
     val jsonString: String = upickle.default.write(outputContent)
     println(jsonString)
 
-    println("Consumer Metrics: ")
-    consumer.metrics().entrySet().forEach(x => println("key=" + x.getKey().name() + ",value=" + x.getValue().metricValue().toString()))
+    // println("Consumer Metrics: ")
+    // consumer.metrics().entrySet().forEach(x => println("key=" + x.getKey().name() + ",value=" + x.getValue().metricValue().toString()))
     
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
 
