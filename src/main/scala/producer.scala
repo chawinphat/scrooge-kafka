@@ -154,7 +154,7 @@ object Producer {
           data = Seq(messageData)
         )
         val seralizedMesage = crossChainMessage.toByteArray
-        println(s"Sending message with content: ${messageData.messageContent}") 
+        // println(s"Sending message with content: ${messageData.messageContent}") 
         val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
         producer.send(record)
 
