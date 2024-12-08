@@ -71,6 +71,9 @@ object Consumer {
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
     props.put("group.id", nodeId.toString)
+    props.put("max.partition.fetch.bytes", 50000000)
+    props.put("fetch.max.bytes", 300000000)
+    
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
 
     val partitionList = new util.ArrayList[TopicPartition]
