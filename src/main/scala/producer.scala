@@ -29,7 +29,7 @@ object Producer {
   val inputPath = configReader.getInputPath() // Path to Linux pipe
 
   def main(args: Array[String]): Unit = {
-    if (topic == "") {
+    if (rsmId == 2) {
       return;
     }
 
@@ -47,9 +47,9 @@ object Producer {
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     props.put("acks", "all")
-    props.put("linger.ms", 10)
-    props.put("batch.size", 200000)
-    props.put("buffer.memory", 1000000000)
+    // props.put("linger.ms", 10)
+    // props.put("batch.size", 200000)
+    // props.put("buffer.memory", 1000000000)
 
     val producer = new KafkaProducer[String, Array[Byte]](props)
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe

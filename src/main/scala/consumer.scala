@@ -42,7 +42,7 @@ object Consumer {
   val writer = new BufferedOutputStream(new FileOutputStream(pipeFile))
 
   def main(args: Array[String]): Unit = {
-    if (topic == "") {
+    if (rsmId == 1) {
       return;
     }
 
