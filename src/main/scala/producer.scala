@@ -46,9 +46,11 @@ object Producer {
     props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
-    props.put("acks", "1")
+    props.put("acks", "all")
     props.put("linger.ms", 0)
     props.put("batch.size", 100000)
+
+    println(s"producer topic (${topic}) and partition (${nodeId})")
 
     val producer = new KafkaProducer[String, Array[Byte]](props)
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
