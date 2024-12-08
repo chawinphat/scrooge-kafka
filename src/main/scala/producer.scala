@@ -162,7 +162,7 @@ object Producer {
        
         }
       }
-    println("total number of messages producer has sent: " + numMessageSent.toString())
+    println("total number of messages producer has sent: " + numMessageSent.toString() + messagesSerialized.toString())
     }
     producer.close()
   }
