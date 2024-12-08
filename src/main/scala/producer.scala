@@ -47,7 +47,7 @@ object Producer {
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     props.put("acks", "0")
-    props.put("linger.ms", 100)
+    props.put("linger.ms", 0)
     props.put("batch.size", 100000)
 
     val producer = new KafkaProducer[String, Array[Byte]](props)
