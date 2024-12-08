@@ -139,7 +139,7 @@ object Producer {
       
       var messagesSerialized = 0
       var startTime = System.currentTimeMillis()
-    
+      var numMessageSent = 0
       println("starting timer")
       while (testTimer.hasTimeLeft()) {
         val messageStr = configReader.getMessage()
@@ -155,11 +155,14 @@ object Producer {
         val seralizedMesage = crossChainMessage.toByteArray
         val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
         producer.send(record)
+        numMessageSent += 1
 
         if (!warmupTimer.hasTimeLeft()) {
           messagesSerialized += 1
+       
         }
       }
+    println("total number of messages producer has sent: " + numMessageSent.toString())
     }
     producer.close()
   }
