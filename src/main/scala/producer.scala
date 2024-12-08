@@ -48,7 +48,7 @@ object Producer {
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     props.put("acks", "1")
     props.put("linger.ms", 0)
-    props.put("batch.size", 10000000)
+    props.put("batch.size", 100000)
 
     val producer = new KafkaProducer[String, Array[Byte]](props)
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
