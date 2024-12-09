@@ -73,7 +73,8 @@ object Consumer {
     props.put("group.id", nodeId.toString)
     props.put("max.partition.fetch.bytes", 50000000)
     props.put("fetch.max.bytes", 300000000)
-    
+    props.put("max.poll.records", 10000)
+
     val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
 
     val partitionList = new util.ArrayList[TopicPartition]
