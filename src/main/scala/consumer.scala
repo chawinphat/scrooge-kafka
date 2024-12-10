@@ -172,6 +172,15 @@ object Consumer {
     println("closing consumer")
     consumers.forEach(consumer => consumer.close())
     println("consumer closed")
+
+    for(i <- 0 to 4){
+      println(s"average fetch latency consumer  ${i} ${consumers.get(i).metrics().get("fetch-latency-avg")}")
+      println(s"average fetch rate consumer     ${i} ${consumers.get(i).metrics().get("fetch-rate")}")
+      println(s"average fetch size consumer     ${i} ${consumers.get(i).metrics().get("fetch-size-avg")}")
+      println(s"average fetch throttle consumer ${i} ${consumers.get(i).metrics().get("fetch-throttle-time-avg")}")
+      println(s"average fetch throttle consumer ${i} ${consumers.get(i).metrics().get("fetch-throttle-time-avg")}")
+      println("")
+    }
   }
   
 
