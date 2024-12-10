@@ -181,7 +181,7 @@ object Producer {
         val curTime = System.currentTimeMillis()
 
         if (curTime - lastPrintMetricTime > 1000) {
-          println(s"Sent ${curPrintMetric} messages in last second")
+          println(s"Sent ${curPrintMetric / ((curTime - lastPrintMetricTime)/1000.0)} messages in last second")
           curPrintMetric = 0
           lastPrintMetricTime = curTime
         }

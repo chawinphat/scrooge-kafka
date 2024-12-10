@@ -130,7 +130,7 @@ object Consumer {
         val curTime = System.currentTimeMillis()
 
         if (curTime - lastPrintMetricTime > 1000) {
-          println(s"Recv ${curPrintMetric} messages in last second")
+          println(s"Recv ${curPrintMetric / ((curTime - lastPrintMetricTime)/1000.0)} messages in last second")
           curPrintMetric = 0
           lastPrintMetricTime = curTime
         }
