@@ -83,9 +83,9 @@ object Consumer {
     props.put("auto.offset.reset", "latest")
     props.put("enable.auto.commit", "false")
     props.put("group.id", System.currentTimeMillis().toString())  // last resort: props.put("group.id", None)
-    props.put("fetch.max.wait.ms", "500")
-    props.put("fetch.min.bytes", "10000000")
-    props.put("max.partition.fetch.bytes", "1000000")
+    // props.put("fetch.max.wait.ms", "500")
+    // props.put("fetch.min.bytes", "10000000")
+    // props.put("max.partition.fetch.bytes", "1000000")
     val numConsumers = 1
     val consumers = new ArrayList[KafkaConsumer[String, Array[Byte]]](numConsumers)
     var curConsumer = 0
