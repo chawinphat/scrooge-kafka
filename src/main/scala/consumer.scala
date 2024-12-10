@@ -85,18 +85,17 @@ object Consumer {
     // props.put("fetch.max.wait.ms", "500")
     // props.put("fetch.min.bytes", "10000000")
     // props.put("max.partition.fetch.bytes", "1000000")
-    val numConsumers = 5
+    val numConsumers = 1
     val consumers = new ArrayList[KafkaConsumer[String, Array[Byte]]](numConsumers)
     var curConsumer = 0
-    
+    consumers.add(new KafkaConsumer[String, Array[Byte]](props))
     for(currentIndex <- 0 to rsmSize.ceil.toInt - 1){
         println("constructing consumer ...")
-        consumers.add(new KafkaConsumer[String, Array[Byte]](props))
         val partitionList = new util.ArrayList[TopicPartition]
         println(s"assigning topic ${topic} and partition ${currentIndex}")
         partitionList.add(new TopicPartition(topic, currentIndex))
-        consumers.get(consumers.size() - 1).assign(partitionList)
     }
+    consumers.get(consumers.size() - 1).assign(partitionList)
 
     val warmupTimer = warmupDuration.seconds.fromNow
     val testTimer = (benchmarkDuration+warmupDuration).seconds.fromNow
