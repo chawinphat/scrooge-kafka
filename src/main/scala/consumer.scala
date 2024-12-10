@@ -88,7 +88,7 @@ object Consumer {
     var lastPrintMetricTime = System.currentTimeMillis()
     var curPrintMetric = 0
     while (testTimer.hasTimeLeft()) {
-      val record = consumer.poll(1000).asScala
+      val record = consumer.poll(50).asScala
       for (data <- record.iterator) {
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
