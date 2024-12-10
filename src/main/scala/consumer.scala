@@ -65,7 +65,7 @@ object Consumer {
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
-    props.put("group.id", "None")  // last resort: props.put("group.id", None)
+    props.put("group.id", System.currentTimeMillis().toString())  // last resort: props.put("group.id", None)
     props.put("fetch.max.wait.ms", "1500")
     props.put("fetch.min.bytes", "1000000")
     val consumers = new ArrayList[KafkaConsumer[String, Array[Byte]]](5)
