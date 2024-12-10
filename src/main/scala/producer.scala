@@ -137,6 +137,7 @@ object Producer {
       // println("after closing producer pipe")
 
     } else { // Send message from config
+      println("sending messages from config")
       val warmupTimer = warmupDuration.seconds.fromNow
       val testTimer = (benchmarkDuration+warmupDuration).seconds.fromNow
       
@@ -159,6 +160,11 @@ object Producer {
         val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), serializedMessage)
         producers.get(curProducer).send(record)
         curProducer = (curProducer + 1) % numKafkaProducers
+
+        if (messagesSerialized % 100000 == (100000-1))
+        {
+          println("sent another 100000 messages")
+        }
 
         if (!warmupTimer.hasTimeLeft()) {
           messagesSerialized += 1
