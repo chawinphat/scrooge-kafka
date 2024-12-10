@@ -26,6 +26,8 @@ import io.confluent.parallelconsumer.ParallelConsumerOptions.CommitMode.PERIODIC
 import io.confluent.parallelconsumer.ParallelConsumerOptions.ProcessingOrder.KEY
 import io.confluent.parallelconsumer.ParallelStreamProcessor.createEosStreamProcessor
 
+import util.concurrent.atomic.AtomicInteger
+
 
 
 object Consumer {
@@ -116,7 +118,9 @@ object Consumer {
     // println("starting timer")
     var lastPrintMetricTime = System.currentTimeMillis()
     var curPrintMetric = 0
-    eosStreamProcessor.poll(record => println(s"Processing a record ${record.size()}"))
+    val counter = new AtomicInteger(0)
+    eosStreamProcessor.poll(record => counter.incrementAndGet())
+    
     while (testTimer.hasTimeLeft()) {
        Thread.sleep(100)
     }
@@ -141,6 +145,8 @@ object Consumer {
 
     val jsonString: String = upickle.default.write(outputContent)
 
+
+    println(s"FINISHED WITH ${counter.get()} msgs")
     println(jsonString)
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
 
