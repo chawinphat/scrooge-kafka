@@ -64,10 +64,20 @@ object Consumer {
     else input + " " * (totalLength - input.length)
   }
 
+  def rotateString(input: String, rotations: Int): String = {
+  val parts = input.split(",") // Split the string by commas
+  if (parts.isEmpty) input // Handle edge cases (empty input)
+  else {
+    val effectiveRotations = rotations % parts.length // Avoid unnecessary full rotations
+    val rotated = parts.drop(effectiveRotations) ++ parts.take(effectiveRotations) // Rotate the list
+    rotated.mkString(",") // Join back into a string
+  }
+}
+
 
   def consumeFromKafka() = {
     val props = new Properties()
-    props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
+    props.put("bootstrap.servers", rotateString(brokerIps, rsmId.toInt)) // To test locally, change brokerIps with "localhost:9092"
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
