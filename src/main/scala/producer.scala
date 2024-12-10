@@ -49,7 +49,9 @@ object Producer {
     props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
-    props.put("acks", "all")
+    props.put("acks", "1")
+    props.put("batch.size", "200000")
+    props.put("linger.ms", "100")
 
     val producers = new ArrayList[KafkaProducer[String, Array[Byte]]](numKafkaProducers)
     var curProducer = 0
