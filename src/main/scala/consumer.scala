@@ -85,10 +85,10 @@ object Consumer {
 
     var outputContent: Map[String, Double] = Map("Start_Time_MS" -> startTime.toDouble) 
     // println("starting timer")
+    var lastPrintMetricTime = System.currentTimeMillis()
+    var curPrintMetric = 0
     while (testTimer.hasTimeLeft()) {
-      println("polling for data")
       val record = consumer.poll(1000).asScala
-        println(s"${record.iterator.length} many records found")
       for (data <- record.iterator) {
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
@@ -126,14 +126,20 @@ object Consumer {
           val messageContent = new String(messageContentBytes, "UTF-8")
         }
 
+        curPrintMetric += 1
+        val curTime = System.currentTimeMillis()
+
+        if (curTime - lastPrintMetricTime > 1000) {
+          println(s"Recv ${curPrintMetric} messages in last second")
+          curPrintMetric = 0
+          lastPrintMetricTime = curTime
+        }
+
         if (!warmupTimer.hasTimeLeft()) {
           messagesDeserialized += 1
         }
       }
     }
-    println("closing consumer")
-    consumer.close()
-    println("consumer closed")
 
     /* Example output:
       { 
@@ -156,6 +162,11 @@ object Consumer {
 
     println(jsonString)
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
+
+
+    println("closing consumer")
+    consumer.close()
+    println("consumer closed")
   }
   
 
