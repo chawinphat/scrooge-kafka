@@ -79,6 +79,7 @@ object Consumer {
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
+    props.put("enable.auto.commit", "false")
     props.put("group.id", System.currentTimeMillis().toString())  // last resort: props.put("group.id", None)
 
     // var options = ParallelConsumerOptions[String, String].builder().build();
