@@ -190,7 +190,7 @@ object Consumer {
     consumers.forEach(consumer => consumer.close())
     println("consumer closed")
 
-    for(i <- 0 to 4){
+    for(i <- 0 to numConsumers-1){
       consumers.get(i).metrics().entrySet().forEach(entry => println(rightPad(s"${entry.getKey().name()}",35) + rightPad(s": ${entry.getValue().metricValue()}",35) + rightPad(s"-- description ${entry.getKey().description()}",30)))
       println("")
     }
