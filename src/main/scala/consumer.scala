@@ -20,7 +20,7 @@ import org.apache.kafka.common.internals.Topic
 import java.io.BufferedOutputStream
 
 object Consumer {
-  // println("initializing consumer")
+  println("initializing consumer")
   val configReader = new ConfigReader
   val rsmId = configReader.getRsmId()
   val nodeId = configReader.getNodeId()
@@ -40,7 +40,7 @@ object Consumer {
   val writer = new BufferedOutputStream(new FileOutputStream(pipeFile))
 
   def main(args: Array[String]): Unit = {
-    // println("starting kafka consumer")
+    println("starting kafka consumer")
     // if (writeDR) {
     //   println("Disaster Recovery set to True")
     // }
@@ -70,6 +70,7 @@ object Consumer {
 
     val partitionList = new util.ArrayList[TopicPartition]
     for (currentIndex <- 0 to rsmSize.ceil.toInt - 1) {
+      println(s"assigning topic ${topic} and partition ${currentIndex}")
       partitionList.add(new TopicPartition(topic, currentIndex))
     }
     consumer.assign(partitionList)
@@ -83,10 +84,10 @@ object Consumer {
     var outputContent: Map[String, Double] = Map("Start_Time_MS" -> startTime.toDouble) 
     // println("starting timer")
     while (testTimer.hasTimeLeft()) {
+      println("polling for data")
       val record = consumer.poll(1000).asScala
-      // println("polling for data")
+        println(s"${record.iterator.length} many records found")
       for (data <- record.iterator) {
-        // println("data found")
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
 
@@ -127,8 +128,10 @@ object Consumer {
           messagesDeserialized += 1
         }
       }
-    }   
+    }
+    println("closing consumer")
     consumer.close()
+    println("consumer closed")
 
     /* Example output:
       { 
