@@ -80,7 +80,7 @@ object Consumer {
     props.put("bootstrap.servers", brokerIps) // To test locally, change brokerIps with "localhost:9092"
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
-    props.put("auto.offset.reset", "earliest")
+    props.put("auto.offset.reset", "latest")
     props.put("enable.auto.commit", "false")
     props.put("group.id", System.currentTimeMillis().toString() + nodeId.toString() + rsmId.toString())  // last resort: props.put("group.id", None)
     // props.put("fetch.max.wait.ms", "500")
