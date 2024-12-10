@@ -116,7 +116,7 @@ object Consumer {
     // println("starting timer")
     var lastPrintMetricTime = System.currentTimeMillis()
     var curPrintMetric = 0
-    eosStreamProcessor.poll(record => println("Processing a record ..."))
+    eosStreamProcessor.poll(record => println(s"Processing a record ${record.size()}"))
     while (testTimer.hasTimeLeft()) {
        Thread.sleep(100)
     }
