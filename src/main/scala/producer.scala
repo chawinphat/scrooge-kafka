@@ -50,13 +50,16 @@ object Producer {
     props.put("acks", "all")
 
     val producers = new ArrayList[KafkaProducer[String, Array[Byte]]](numKafkaProducers)
-    var curProducer = 0 
+    var curProducer = 0
+    var lastPrintMetricTime = System.currentTimeMillis()
+    var curPrintMetric = 0
     
     for( a <- 1 to numKafkaProducers){
         producers.add(new KafkaProducer[String, Array[Byte]](props))
     }
 
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
+      println("Reading from pipe")
       val linuxPipe = new RandomAccessFile(inputPath, "r")
       if (linuxPipe != null) {
         // println("Pipe exists!")
@@ -72,7 +75,7 @@ object Producer {
       var messagesSerialized = 0
       var startTime = System.currentTimeMillis()
 
-      println("starting timer")
+      println("starting timer pipe")
       while (testTimer.hasTimeLeft()) {
 
         sizeBuffer.clear()
@@ -119,6 +122,14 @@ object Producer {
               val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
               producers.get(curProducer).send(record)
               curProducer = (curProducer + 1) % numKafkaProducers
+              curPrintMetric += 1
+              val curTime = System.currentTimeMillis()
+
+              if (curTime - lastPrintMetricTime > 1000) {
+                println(s"Sent ${curPrintMetric} messages in last second")
+                curPrintMetric = 0
+                lastPrintMetricTime = curTime
+              }
 
               if (!warmupTimer.hasTimeLeft()) {
                 messagesSerialized += 1
@@ -144,7 +155,7 @@ object Producer {
       var messagesSerialized = 0
       var startTime = System.currentTimeMillis()
     
-      println("starting timer")
+      println("starting timer config")
       while (testTimer.hasTimeLeft()) {
         val messageStr = configReader.getMessage()
         val messageStrBytes = messageStr.getBytes("UTF-8")
@@ -161,9 +172,14 @@ object Producer {
         producers.get(curProducer).send(record)
         curProducer = (curProducer + 1) % numKafkaProducers
 
-        if (messagesSerialized % 100000 == (100000-1))
-        {
-          println("sent another 100000 messages")
+        curProducer = (curProducer + 1) % numKafkaProducers
+        curPrintMetric += 1
+        val curTime = System.currentTimeMillis()
+
+        if (curTime - lastPrintMetricTime > 1000) {
+          println(s"Sent ${curPrintMetric} messages in last second")
+          curPrintMetric = 0
+          lastPrintMetricTime = curTime
         }
 
         if (!warmupTimer.hasTimeLeft()) {
