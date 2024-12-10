@@ -116,59 +116,11 @@ object Consumer {
     // println("starting timer")
     var lastPrintMetricTime = System.currentTimeMillis()
     var curPrintMetric = 0
+    eosStreamProcessor.poll(record => println("Processing a record ..."))
     while (testTimer.hasTimeLeft()) {
-      val record = eosStreamProcessor.poll(record => println("Processing a record ..."))
-      // for (data <- record.iterator) {
-      //   val crossChainMessage = CrossChainMessage.parseFrom(data.value())
-      //   val messageDataList = crossChainMessage.data
-
-      //   if (writeDR) {
-      //     val transferMessage = ScroogeTransfer().withUnvalidatedCrossChainMessage(crossChainMessage)
-      //     val transferBytes = transferMessage.toByteArray
-      //     val transferSize = transferBytes.length
-      //     val buffer = ByteBuffer.allocate(8)
-      //     buffer.order(ByteOrder.LITTLE_ENDIAN)
-      //     buffer.putLong(transferSize)
-
-      //     writer.write(buffer.array())
-      //     writer.write(transferMessage.toByteArray)
-      //   }
-
-      //   if (writeCCF) {
-      //     for (msg <- messageDataList) {
-      //       val recievedKeyValue = KeyValueHash.parseFrom(msg.messageContent.toByteArray())
-      //       val transferMessage = ScroogeTransfer().withKeyValueHash(recievedKeyValue)
-      //       val transferBytes = transferMessage.toByteArray
-      //       val transferSize = transferBytes.length
-      //       val buffer = ByteBuffer.allocate(8)
-      //       buffer.order(ByteOrder.LITTLE_ENDIAN)
-      //       buffer.putLong(transferSize)
-
-      //       writer.write(buffer.array())
-      //       writer.write(transferMessage.toByteArray)
-      //     }
-      //   }
-
-
-      //   messageDataList.foreach { messageData =>
-      //     val messageContentBytes = messageData.messageContent.toByteArray()
-      //     val messageContent = new String(messageContentBytes, "UTF-8")
-      //   }
-
-      //   curPrintMetric += data.serializedValueSize()
-      //   val curTime = System.currentTimeMillis()
-
-      //   if (curTime - lastPrintMetricTime > 1000) {
-      //     println(s"Recv ${curPrintMetric / ((curTime - lastPrintMetricTime)/1000.0) /1024/1024} MBps in last second")
-      //     curPrintMetric = 0
-      //     lastPrintMetricTime = curTime
-      //   }
-
-      //   if (!warmupTimer.hasTimeLeft()) {
-      //     messagesDeserialized += 1
-      //   }
-      // }
+       Thread.sleep(100)
     }
+    eosStreamProcessor.close()
 
     /* Example output:
       { 
