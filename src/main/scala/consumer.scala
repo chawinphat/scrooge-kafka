@@ -19,16 +19,6 @@ import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.internals.Topic
 import java.io.BufferedOutputStream
 import java.util.ArrayList
-import io.confluent.parallelconsumer.ParallelStreamProcessor.ConsumeProduceResult
-import io.confluent.parallelconsumer.ParallelConsumerOptions
-import io.confluent.parallelconsumer.ParallelStreamProcessor
-import io.confluent.parallelconsumer.ParallelConsumerOptions.CommitMode.PERIODIC_CONSUMER_SYNC
-import io.confluent.parallelconsumer.ParallelConsumerOptions.ProcessingOrder.KEY
-import io.confluent.parallelconsumer.ParallelStreamProcessor.createEosStreamProcessor
-
-import util.concurrent.atomic.AtomicInteger
-
-
 
 object Consumer {
   println("initializing consumer")
@@ -74,6 +64,16 @@ object Consumer {
     else input + " " * (totalLength - input.length)
   }
 
+  def rotateString(input: String, rotations: Int): String = {
+  val parts = input.split(",") // Split the string by commas
+  if (parts.isEmpty) input // Handle edge cases (empty input)
+  else {
+    val effectiveRotations = rotations % parts.length // Avoid unnecessary full rotations
+    val rotated = parts.drop(effectiveRotations) ++ parts.take(effectiveRotations) // Rotate the list
+    rotated.mkString(",") // Join back into a string
+  }
+}
+
 
   def consumeFromKafka() = {
     val props = new Properties()
@@ -83,30 +83,20 @@ object Consumer {
     props.put("auto.offset.reset", "latest")
     props.put("enable.auto.commit", "false")
     props.put("group.id", System.currentTimeMillis().toString())  // last resort: props.put("group.id", None)
-
-    // var options = ParallelConsumerOptions[String, String].builder().build();
     // props.put("fetch.max.wait.ms", "500")
     // props.put("fetch.min.bytes", "10000000")
     // props.put("max.partition.fetch.bytes", "1000000")
-    val consumer = new KafkaConsumer[String, Array[Byte]](props)
+    val numConsumers = 1
+    val consumers = new ArrayList[KafkaConsumer[String, Array[Byte]]](numConsumers)
+    var curConsumer = 0
+    consumers.add(new KafkaConsumer[String, Array[Byte]](props))
     val partitionList = new util.ArrayList[TopicPartition]
-    // for(currentIndex <- 0 to rsmSize.ceil.toInt - 1){
-    //     println("constructing consumer ...")
-    //     println(s"assigning topic ${topic} and partition ${currentIndex}")
-    //     partitionList.add(new TopicPartition(topic, currentIndex))
-    // }
-    // consumer.assign(partitionList)
-
-    val options = ParallelConsumerOptions
-        .builder()
-        .maxConcurrency(1000)
-        .consumer(consumer)
-        .build()
-
-    val eosStreamProcessor: ParallelStreamProcessor[String, Array[Byte]] =
-      createEosStreamProcessor(options)
-    eosStreamProcessor.subscribe(List(topic).asJava)
-
+    for(currentIndex <- 0 to rsmSize.ceil.toInt - 1){
+        println("constructing consumer ...")
+        println(s"assigning topic ${topic} and partition ${currentIndex}")
+        partitionList.add(new TopicPartition(topic, currentIndex))
+    }
+    consumers.get(consumers.size() - 1).assign(partitionList)
 
     val warmupTimer = warmupDuration.seconds.fromNow
     val testTimer = (benchmarkDuration+warmupDuration).seconds.fromNow
@@ -118,13 +108,60 @@ object Consumer {
     // println("starting timer")
     var lastPrintMetricTime = System.currentTimeMillis()
     var curPrintMetric = 0
-    val counter = new AtomicInteger(0)
-    eosStreamProcessor.poll(record => counter.incrementAndGet())
-    
     while (testTimer.hasTimeLeft()) {
-       Thread.sleep(100)
+      val record = consumers.get(curConsumer).poll(100).asScala
+      curConsumer = (curConsumer + 1) % numConsumers;
+      for (data <- record.iterator) {
+        val crossChainMessage = CrossChainMessage.parseFrom(data.value())
+        val messageDataList = crossChainMessage.data
+
+        if (writeDR) {
+          val transferMessage = ScroogeTransfer().withUnvalidatedCrossChainMessage(crossChainMessage)
+          val transferBytes = transferMessage.toByteArray
+          val transferSize = transferBytes.length
+          val buffer = ByteBuffer.allocate(8)
+          buffer.order(ByteOrder.LITTLE_ENDIAN)
+          buffer.putLong(transferSize)
+
+          writer.write(buffer.array())
+          writer.write(transferMessage.toByteArray)
+        }
+
+        if (writeCCF) {
+          for (msg <- messageDataList) {
+            val recievedKeyValue = KeyValueHash.parseFrom(msg.messageContent.toByteArray())
+            val transferMessage = ScroogeTransfer().withKeyValueHash(recievedKeyValue)
+            val transferBytes = transferMessage.toByteArray
+            val transferSize = transferBytes.length
+            val buffer = ByteBuffer.allocate(8)
+            buffer.order(ByteOrder.LITTLE_ENDIAN)
+            buffer.putLong(transferSize)
+
+            writer.write(buffer.array())
+            writer.write(transferMessage.toByteArray)
+          }
+        }
+
+
+        messageDataList.foreach { messageData =>
+          val messageContentBytes = messageData.messageContent.toByteArray()
+          val messageContent = new String(messageContentBytes, "UTF-8")
+        }
+
+        curPrintMetric += data.serializedValueSize()
+        val curTime = System.currentTimeMillis()
+
+        if (curTime - lastPrintMetricTime > 1000) {
+          println(s"Recv ${curPrintMetric / ((curTime - lastPrintMetricTime)/1000.0) /1024/1024} MBps in last second")
+          curPrintMetric = 0
+          lastPrintMetricTime = curTime
+        }
+
+        if (!warmupTimer.hasTimeLeft()) {
+          messagesDeserialized += 1
+        }
+      }
     }
-    eosStreamProcessor.close()
 
     /* Example output:
       { 
@@ -145,15 +182,18 @@ object Consumer {
 
     val jsonString: String = upickle.default.write(outputContent)
 
-
-    println(s"FINISHED WITH ${counter.get()} msgs")
     println(jsonString)
     outputWriter.writeOutput(jsonString, "/tmp/output.json") // This one is for local read
 
-    // for(i <- 0 to 4){
-    //   consumers.get(i).metrics().entrySet().forEach(entry => println(rightPad(s"${entry.getKey().name()}",35) + rightPad(s": ${entry.getValue().metricValue()}",35) + rightPad(s"-- description ${entry.getKey().description()}",30)))
-    //   println("")
-    // }
+
+    println("closing consumer")
+    consumers.forEach(consumer => consumer.close())
+    println("consumer closed")
+
+    for(i <- 0 to 4){
+      consumers.get(i).metrics().entrySet().forEach(entry => println(rightPad(s"${entry.getKey().name()}",35) + rightPad(s": ${entry.getValue().metricValue()}",35) + rightPad(s"-- description ${entry.getKey().description()}",30)))
+      println("")
+    }
   }
   
 
