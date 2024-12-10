@@ -91,7 +91,7 @@ object Consumer {
     var curConsumer = 0
     consumers.add(new KafkaConsumer[String, Array[Byte]](props))
     val partitionList = new util.ArrayList[TopicPartition]
-    for(currentIndex <- 0 to rsmSize.ceil.toInt - 1){
+    for(currentIndex <- 0 to (30*rsmSize.ceil.toInt) - 1){
         println("constructing consumer ...")
         println(s"assigning topic ${topic} and partition ${currentIndex}")
         partitionList.add(new TopicPartition(topic, currentIndex))

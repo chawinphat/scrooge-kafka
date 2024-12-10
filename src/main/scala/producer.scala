@@ -123,7 +123,7 @@ object Producer {
               )
               val seralizedMesage = crossChainMessage.toByteArray
 
-              val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
+              val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt * numKafkaProducers + curProducer, nodeId.toInt.toString(), seralizedMesage)
               producers.get(curProducer).send(record)
               curProducer = (curProducer + 1) % numKafkaProducers
               curPrintMetric += 1
