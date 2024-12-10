@@ -68,7 +68,7 @@ object Consumer {
     props.put("group.id", System.currentTimeMillis().toString())  // last resort: props.put("group.id", None)
     props.put("fetch.max.wait.ms", "1500")
     props.put("fetch.min.bytes", "1000000")
-    val numConsumers = 1
+    val numConsumers = 5
     val consumers = new ArrayList[KafkaConsumer[String, Array[Byte]]](numConsumers)
     var curConsumer = 0
     
@@ -92,7 +92,7 @@ object Consumer {
     var lastPrintMetricTime = System.currentTimeMillis()
     var curPrintMetric = 0
     while (testTimer.hasTimeLeft()) {
-      val record = consumers.get(curConsumer).poll(1000).asScala
+      val record = consumers.get(curConsumer).poll(100).asScala
       curConsumer = (curConsumer + 1) % numConsumers;
       for (data <- record.iterator) {
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
