@@ -117,13 +117,12 @@ object Producer {
         maybeCrossChainMessageData match {
           case Some(v) =>
             val crossChainMessageData = v.get
-            if (crossChainMessageData.sequenceNumber % rsmSize == nodeId) {
               val crossChainMessage = CrossChainMessage (
                 data = Seq(crossChainMessageData)
               )
               val seralizedMesage = crossChainMessage.toByteArray
 
-              val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
+              val record = new ProducerRecord[String, Array[Byte]](topic,  seralizedMesage)
               producers.get(curProducer).send(record)
               curProducer = (curProducer + 1) % numKafkaProducers
               curPrintMetric += 1
@@ -138,7 +137,6 @@ object Producer {
               if (!warmupTimer.hasTimeLeft()) {
                 messagesSerialized += 1
               }
-            }
             
           case None =>
             println("CrossChainMessageData not found")

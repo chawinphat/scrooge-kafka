@@ -82,7 +82,7 @@ object Consumer {
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
     props.put("enable.auto.commit", "false")
-    props.put("group.id", System.currentTimeMillis().toString() + nodeId.toString() + rsmId.toString())  // last resort: props.put("group.id", None)
+    props.put("group.id", rsmId.toString())
     // props.put("fetch.max.wait.ms", "500")
     // props.put("fetch.min.bytes", "10000000")
     // props.put("max.partition.fetch.bytes", "1000000")
