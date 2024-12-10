@@ -58,6 +58,12 @@ object Consumer {
 
     writer.close()
   }
+  
+  def rightPad(input: String, totalLength: Int): String = {
+    if (input.length >= totalLength) input
+    else input + " " * (totalLength - input.length)
+  }
+
 
   def consumeFromKafka() = {
     val props = new Properties()
@@ -174,7 +180,7 @@ object Consumer {
     println("consumer closed")
 
     for(i <- 0 to 4){
-      consumers.get(i).metrics().entrySet().forEach(entry => println(s"key: ${entry.getKey().name()} value: ${entry.getValue().metricValue()}   -- description ${entry.getKey().description()}"))
+      consumers.get(i).metrics().entrySet().forEach(entry => println(rightPad(s"${entry.getKey().name()}",35) + rightPad(s": ${entry.getValue().metricValue()}",35) + rightPad(s"-- description ${entry.getKey().description()}",30)))
       println("")
     }
   }
