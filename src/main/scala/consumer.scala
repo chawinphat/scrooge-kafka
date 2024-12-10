@@ -173,6 +173,8 @@ object Consumer {
     consumers.forEach(consumer => consumer.close())
     println("consumer closed")
 
+    println(consumers.get(0).metrics())
+
     for(i <- 0 to 4){
       println(s"average fetch latency consumer  ${i} ${consumers.get(i).metrics().get("fetch-latency-avg")}")
       println(s"average fetch rate consumer     ${i} ${consumers.get(i).metrics().get("fetch-rate")}")
