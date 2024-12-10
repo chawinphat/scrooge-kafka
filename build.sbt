@@ -9,11 +9,14 @@ Compile / PB.targets := Seq(
   scalapb.gen() -> (Compile / sourceManaged).value / "scalapb"
 )
 
+
+
 lazy val root = (project in file("."))
   .settings(
     name := "kafka-test",
     libraryDependencies += munit % Test,
     libraryDependencies += "org.apache.kafka" % "kafka-clients" % "3.6.0",
+    libraryDependencies += "io.confluent.parallelconsumer" % "parallel-consumer-core" % "0.5.3.2",
     libraryDependencies ++= Seq(
     "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"),
     libraryDependencies += "com.lihaoyi" %% "upickle" % "3.2.0"
