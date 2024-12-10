@@ -88,7 +88,7 @@ object Consumer {
     var lastPrintMetricTime = System.currentTimeMillis()
     var curPrintMetric = 0
     while (testTimer.hasTimeLeft()) {
-      val record = consumer.poll(50).asScala
+      val record = consumer.poll(1000).asScala
       for (data <- record.iterator) {
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
@@ -126,11 +126,11 @@ object Consumer {
           val messageContent = new String(messageContentBytes, "UTF-8")
         }
 
-        curPrintMetric += 1
+        curPrintMetric += data.serializedValueSize()
         val curTime = System.currentTimeMillis()
 
         if (curTime - lastPrintMetricTime > 1000) {
-          println(s"Recv ${curPrintMetric / ((curTime - lastPrintMetricTime)/1000.0)} messages in last second")
+          println(s"Recv ${curPrintMetric / ((curTime - lastPrintMetricTime)/1000.0) /1024/1024} MBps in last second")
           curPrintMetric = 0
           lastPrintMetricTime = curTime
         }
