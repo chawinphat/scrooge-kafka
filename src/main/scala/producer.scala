@@ -32,6 +32,7 @@ object Producer {
 
   def main(args: Array[String]): Unit = {
     println(s"starting kafka producer with broker IPS: ${brokerIps}")
+    println(s"Node/Partition ${nodeId.toInt} Topic ${topic}")
     if (topic == "") {
       return;
     }
