@@ -40,7 +40,7 @@ object Consumer {
   val writer = new BufferedOutputStream(new FileOutputStream(pipeFile))
 
   def main(args: Array[String]): Unit = {
-    println("starting kafka consumer")
+    println(s"starting kafka consumer with broker IPS: ${brokerIps}")
     // if (writeDR) {
     //   println("Disaster Recovery set to True")
     // }

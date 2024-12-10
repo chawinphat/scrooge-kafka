@@ -31,6 +31,7 @@ object Producer {
   val numKafkaProducers = 30
 
   def main(args: Array[String]): Unit = {
+    println(s"starting kafka producer with broker IPS: ${brokerIps}")
     if (topic == "") {
       return;
     }
