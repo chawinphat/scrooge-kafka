@@ -18,6 +18,7 @@ import java.nio.{ByteBuffer, ByteOrder}
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.internals.Topic
 import java.io.BufferedOutputStream
+import java.util.ArrayList
 
 object Consumer {
   println("initializing consumer")
@@ -67,15 +68,17 @@ object Consumer {
     props.put("group.id", "None")  // last resort: props.put("group.id", None)
     props.put("fetch.max.wait.ms", "1500")
     props.put("fetch.min.bytes", "1000000")
-    val consumer: KafkaConsumer[String, Array[Byte]] = new KafkaConsumer[String, Array[Byte]](props)
-
-
-    val partitionList = new util.ArrayList[TopicPartition]
-    for (currentIndex <- 0 to rsmSize.ceil.toInt - 1) {
-      println(s"assigning topic ${topic} and partition ${currentIndex}")
-      partitionList.add(new TopicPartition(topic, currentIndex))
+    val consumers = new ArrayList[KafkaConsumer[String, Array[Byte]]](5)
+    var curConsumer = 0
+    
+    for(currentIndex <- 0 to rsmSize.ceil.toInt - 1){
+        println("constructing consumer ...")
+        consumers.add(new KafkaConsumer[String, Array[Byte]](props))
+        val partitionList = new util.ArrayList[TopicPartition]
+        println(s"assigning topic ${topic} and partition ${currentIndex}")
+        partitionList.add(new TopicPartition(topic, currentIndex))
+        consumers.get(consumers.size() - 1).assign(partitionList)
     }
-    consumer.assign(partitionList)
 
     val warmupTimer = warmupDuration.seconds.fromNow
     val testTimer = (benchmarkDuration+warmupDuration).seconds.fromNow
@@ -88,7 +91,8 @@ object Consumer {
     var lastPrintMetricTime = System.currentTimeMillis()
     var curPrintMetric = 0
     while (testTimer.hasTimeLeft()) {
-      val record = consumer.poll(1000).asScala
+      val record = consumers.get(curConsumer).poll(1000).asScala
+      curConsumer = (curConsumer + 1) % 5;
       for (data <- record.iterator) {
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
@@ -165,7 +169,7 @@ object Consumer {
 
 
     println("closing consumer")
-    consumer.close()
+    consumers.forEach(consumer => consumer.close())
     println("consumer closed")
   }
   
