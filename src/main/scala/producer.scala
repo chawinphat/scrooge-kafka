@@ -15,6 +15,7 @@ import java.io.RandomAccessFile
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import java.util.ArrayList
 
 object Producer {
   val configReader = new ConfigReader
@@ -27,6 +28,7 @@ object Producer {
   val warmupDuration = configReader.getWarmupDuration()
   val cooldownDuration = configReader.getCooldownDuration()
   val inputPath = configReader.getInputPath() // Path to Linux pipe
+  val numKafkaProducers = 30
 
   def main(args: Array[String]): Unit = {
     if (topic == "") {
@@ -47,7 +49,13 @@ object Producer {
     props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer")
     props.put("acks", "all")
 
-    val producer = new KafkaProducer[String, Array[Byte]](props)
+    val producers = new ArrayList[KafkaProducer[String, Array[Byte]]](numKafkaProducers)
+    var curProducer = 0 
+    
+    for( a <- 1 to numKafkaProducers){
+        producers.add(new KafkaProducer[String, Array[Byte]](props))
+    }
+
     if (configReader.shouldReadFromPipe()) { // Send message from Linux pipe
       val linuxPipe = new RandomAccessFile(inputPath, "r")
       if (linuxPipe != null) {
@@ -109,7 +117,8 @@ object Producer {
               val seralizedMesage = crossChainMessage.toByteArray
 
               val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
-              producer.send(record)
+              producers.get(curProducer).send(record)
+              curProducer = (curProducer + 1) % numKafkaProducers
 
               if (!warmupTimer.hasTimeLeft()) {
                 messagesSerialized += 1
@@ -121,6 +130,7 @@ object Producer {
         }
       }
 
+      println(s"Messages Seralized ${messagesSerialized}")
       // println("before closing producer pipe")
       linuxPipe.close()
       linuxChannel.close()
@@ -147,13 +157,16 @@ object Producer {
         )
         val seralizedMesage = crossChainMessage.toByteArray
         val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
-        producer.send(record)
+        producers.get(curProducer).send(record)
+        curProducer = (curProducer + 1) % numKafkaProducers
 
         if (!warmupTimer.hasTimeLeft()) {
           messagesSerialized += 1
         }
       }
+      println(s"Messages Seralized ${messagesSerialized}")
     }
-    producer.close()
+    producers.forEach(producer => producer.close())
   }
 }
+
