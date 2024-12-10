@@ -66,7 +66,7 @@ object Consumer {
     props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer")
     props.put("auto.offset.reset", "latest")
     props.put("group.id", System.currentTimeMillis().toString())  // last resort: props.put("group.id", None)
-    props.put("fetch.max.wait.ms", "1500")
+    props.put("fetch.max.wait.ms", "500")
     props.put("fetch.min.bytes", "1000000")
     val numConsumers = 5
     val consumers = new ArrayList[KafkaConsumer[String, Array[Byte]]](numConsumers)
@@ -174,10 +174,8 @@ object Consumer {
     println("consumer closed")
 
     for(i <- 0 to 4){
-      println(s"PRINTING METRICS FOR ${i}")
-      consumers.get(i).metrics().entrySet().forEach(entry => println(s"key: ${entry.getKey()} value: ${entry.getValue().metricValue()}"))
-      println("ending")
-      println("ending")
+      consumers.get(i).metrics().entrySet().forEach(entry => println(s"key: ${entry.getKey().name()} value: ${entry.getValue().metricValue()}   -- description ${entry.getKey().description()}"))
+      println("")
     }
   }
   
