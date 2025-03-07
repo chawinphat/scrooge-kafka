@@ -18,6 +18,7 @@ import java.nio.{ByteBuffer, ByteOrder}
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.internals.Topic
 import java.io.BufferedOutputStream
+import java.time.Instant
 
 object Consumer {
   // println("initializing consumer")
@@ -87,6 +88,7 @@ object Consumer {
       // println("polling for data")
       for (data <- record.iterator) {
         // println("data found")
+        println("Kafka message processing latency: " + (Instant.now().toEpochMilli - data.timestamp()) + "ms");
         val crossChainMessage = CrossChainMessage.parseFrom(data.value())
         val messageDataList = crossChainMessage.data
 

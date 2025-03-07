@@ -11,6 +11,7 @@ import java.util.Properties
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.io.RandomAccessFile
+import java.time.Instant
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -108,7 +109,7 @@ object Producer {
               )
               val seralizedMesage = crossChainMessage.toByteArray
 
-              val record = new ProducerRecord[String, Array[Byte]](topic, nodeId.toInt, nodeId.toInt.toString(), seralizedMesage)
+              val record = new ProducerRecord[String, Array[Byte]](/* String topic */ topic, /* Integer partition */ nodeId.toInt, /* Long timestamp */ Instant.now().toEpochMilli(), /* String key */ nodeId.toInt.toString(), /* Array[Byte] value */ seralizedMesage)
               producer.send(record)
 
               if (!warmupTimer.hasTimeLeft()) {
