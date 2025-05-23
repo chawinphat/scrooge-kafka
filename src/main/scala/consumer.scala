@@ -179,6 +179,11 @@ object Consumer {
     outputContent += ("Total_Messages" -> messagesDeserialized.toDouble)
     outputContent += ("Final_Elapsed_Time_S" -> ((finalTime - startTime).toDouble/ 1000))   
     outputContent += ("Overall_Throughput_MPS" -> overallThroughput.toDouble)
+    outputContent += ("max_quorum_acknowledgment" -> messagesDeserialized)
+    outputContent += ("starting_quack" -> 0)
+    outputContent += ("duration_seconds" -> benchmarkDuration)
+    outputContent += ("local_network_size" -> rsmSize.ceil.toInt)
+    outputContent += ("message_size" -> configReader.getMessageSize())
 
     val jsonString: String = upickle.default.write(outputContent)
 
