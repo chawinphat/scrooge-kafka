@@ -75,5 +75,8 @@ class ConfigReader {
   def getWriteCCF(): Boolean = {
     configData("write_ccf").bool
   }
+  def getMessageSize(): Int = {
+    configData("message_size").num.toInt
+  }
 }
 
